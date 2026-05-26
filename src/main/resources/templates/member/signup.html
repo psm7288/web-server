@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 — CloudHost</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI','Malgun Gothic',sans-serif; background:#f4f6fb; }
+        .navbar { background:#1a237e; color:white; padding:14px 40px; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-size:20px; font-weight:800; text-decoration:none; color:white; }
+        .logo span { color:#82b1ff; }
+        .btn { border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:700; cursor:pointer; }
+        .btn-outline { background:transparent; border:2px solid white; color:white; }
+        .btn-primary { background:#1565c0; color:white; }
+        .btn-primary:hover { background:#0d47a1; }
+        .wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 16px; }
+        .card { background:white; border-radius:14px; padding:36px 40px; width:100%; max-width:500px; box-shadow:0 2px 10px rgba(0,0,0,.07); }
+        .card h2 { font-size:26px; font-weight:800; color:#1a237e; margin-bottom:6px; }
+        .sub { color:#888; font-size:13px; margin-bottom:28px; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:13px; font-weight:700; color:#333; margin-bottom:6px; }
+        .form-control { width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:13px; outline:none; }
+        .form-control:focus { border-color:#1565c0; }
+        .dup-row { display:flex; gap:8px; }
+        .dup-row .form-control { flex:1; }
+        .row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .alert-error { background:#fce4ec; color:#c62828; border-radius:8px; padding:10px 16px; font-size:13px; margin-bottom:16px; }
+        .dup-msg { font-size:12px; margin-top:5px; }
+        .dup-msg.ok  { color:#2e7d32; }
+        .dup-msg.err { color:#c62828; }
+        .divider { height:1px; background:#e8eaf6; margin:20px 0; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a th:href="@{/}" class="logo">☁️ Cloud<span>Host</span></a>
+    <a th:href="@{/login}"><button class="btn btn-outline">로그인</button></a>
+</nav>
+<div class="wrap">
+    <div class="card">
+        <h2>회원가입</h2>
+        <p class="sub">계정을 만들고 서버 호스팅을 시작하세요</p>
+
+
+        <form th:action="@{/signup}" method="post" th:object="${signupForm}">
+            <div class="form-group">
+                <label>아이디 <span style="color:#c62828">*</span></label>
+                <div class="dup-row">
+                    <input type="text" class="form-control" th:field="*{username}"
+                           placeholder="영문, 숫자 4~20자" id="usernameInput" />
+                    <button type="button" class="btn btn-primary" style="white-space:nowrap"
+                            onclick="checkUsername()">중복 확인</button>
+                </div>
+                <div class="dup-msg" id="dupMsg"></div>
+            </div>
+
+            <div class="form-group">
+                <label>비밀번호 <span style="color:#c62828">*</span></label>
+                <input type="password" class="form-control" th:field="*{password}" placeholder="8자 이상 입력" />
+            </div>
+
+            <div class="form-group">
+                <label>비밀번호 확인 <span style="color:#c62828">*</span></label>
+                <input type="password" class="form-control" th:field="*{passwordConfirm}" placeholder="비밀번호 재입력" />
+            </div>
+
+            <div class="row2">
+                <div class="form-group">
+                    <label>이름 <span style="color:#c62828">*</span></label>
+                    <input type="text" class="form-control" th:field="*{name}" placeholder="실명 입력" />
+                </div>
+                <div class="form-group">
+                    <label>전화번호 <span style="color:#c62828">*</span></label>
+                    <input type="text" class="form-control" th:field="*{phone}" placeholder="010-0000-0000" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>이메일 <span style="color:#c62828">*</span></label>
+                <input type="email" class="form-control" th:field="*{email}" placeholder="example@email.com" />
+            </div>
+
+            <button type="submit" class="btn btn-primary"
+                    style="width:100%;padding:13px;font-size:15px;margin-top:6px">
+                회원가입 완료
+            </button>
+        </form>
+
+        <div class="divider"></div>
+        <p style="text-align:center;font-size:13px;color:#888">
+            이미 계정이 있으신가요?
+            <a th:href="@{/login}" style="color:#1565c0;font-weight:700">로그인</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    function checkUsername() {
+      const username = document.getElementById('usernameInput').value.trim();
+      const msg = document.getElementById('dupMsg');
+      if (!username) { msg.textContent = '아이디를 입력해주세요.'; msg.className = 'dup-msg err'; return; }
+      fetch('/signup/check-username?username=' + encodeURIComponent(username))
+        .then(r => r.json())
+        .then(data => {
+          if (data.duplicated) {
+            msg.textContent = '❌ 이미 사용 중인 아이디입니다.';
+            msg.className = 'dup-msg err';
+          } else {
+            msg.textContent = '✅ 사용 가능한 아이디입니다.';
+            msg.className = 'dup-msg ok';
+          }
+        });
+    }
+</script>
+</body>
+</html>
