@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CloudHost - 내 가상 서버 관리</title>
+    <style>
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
+        .navbar { background: #1a237e; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-size: 20px; font-weight: bold; color: white; text-decoration: none; }
+        .navbar .user-info { font-size: 14px; }
+        .navbar .logout-btn { margin-left: 14px; color: #ff8a80; text-decoration: none; }
+
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .tab-menu { display: flex; gap: 8px; border-bottom: 2px solid #1a237e; padding-bottom: 10px; margin-bottom: 25px; }
+        .tab-item { display: block; padding: 10px 20px; color: #555; text-decoration: none; font-weight: bold; }
+        .tab-item:hover { color: #1a237e; }
+        .tab-item.active { color: #1a237e; border-bottom: 4px solid #1a237e; }
+
+        .page-title { color: #1a237e; margin-bottom: 20px; }
+
+        /* 서버 가상 카드 스타일 (오타 수정 완료) */
+        .package-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+        .package-header { background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; }
+        .package-title { font-weight: bold; font-size: 16px; color: #333; }
+        .package-date { font-size: 13px; color: #888; }
+        .card-body { padding: 20px; }
+
+        .server-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 15px; background: #fff; }
+        .server-badge { padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 14px; text-align: center; width: 60px; }
+        .badge-web { background: #e3f2fd; color: #1e88e5; }
+        .badge-db { background: #e8f5e9; color: #43a047; }
+
+        .server-info { flex: 1; margin-left: 20px; font-size: 14px; color: #666; line-height: 1.6; }
+        .server-info strong { color: #333; }
+
+        .server-actions { display: flex; gap: 5px; align-items: center; }
+        .btn { padding: 8px 14px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn:hover { background: #f0f0f0; }
+        .btn-status { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; font-weight: bold; cursor: default; }
+        .btn-danger { color: #d32f2f; border-color: #ffcdd2; }
+        .btn-danger:hover { background: #ffebee; }
+
+        /* 📊 실시간 모니터링 프로그레스 바 스타일 */
+        .monitoring-zone { margin-top: 12px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 12px; width: 280px; }
+        .metric-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .progress-container { width: 55%; background-color: #e9ecef; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 7px; background-color: #007bff; width: 40%; transition: width 1s ease-in-out; }
+        .progress-bar-fill.ram { background-color: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/dashboard" class="logo">☁️ CloudHost</a>
+    <div class="user-info">
+        <span th:text="|${username}님 로그인 중|">테스트유저님 로그인 중</span>
+        <a href="#" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tab-menu">
+        <a href="/dashboard" class="tab-item">🏠 대시보드 홈</a>
+        <a href="/servers/shop" class="tab-item">🛒 서버 상품 신청</a>
+        <a href="/servers/my" class="tab-item active">💻 내 가상 서버 관리</a>
+    </div>
+
+    <h2 class="page-title">내 가상 서버 관리</h2>
+
+    <div class="package-card">
+        <div class="package-header">
+            <span class="package-title">📦 기본 풀스택 패키지 <small style="color: #666; font-weight: normal;">(ID: PKG-001)</small></span>
+            <span class="package-date">생성일: 2026-05-25</span>
+        </div>
+        <div class="card-body">
+
+            <div class="server-item">
+                <div class="server-badge badge-web">Web<br>서버</div>
+                <div class="server-info">
+                    가상컴퓨터 ID: <strong>VM-WEB-7821</strong><br>
+                    접속 IP: <strong>192.168.10.15</strong>
+                </div>
+                <div class="server-info">
+                    스펙: vCPU 2 Cores / RAM 4GB<br>
+                    OS: Ubuntu 24.04 LTS
+                </div>
+
+                <div class="monitoring-zone">
+                    <div class="metric-row">
+                        <span>CPU 사용량: <strong id="web-cpu-text">--%</strong></span>
+                        <div class="progress-container"><div id="web-cpu-bar" class="progress-bar-fill"></div></div>
+                    </div>
+                    <div class="metric-row">
+                        <span>RAM 사용량: <strong id="web-ram-text">--%</strong></span>
+                        <div class="progress-container"><div id="web-ram-bar" class="progress-bar-fill ram"></div></div>
+                    </div>
+                </div>
+
+                <div class="server-actions">
+                    <span class="btn btn-status">● 구동 중</span>
+                    <button class="btn" onclick="sendControlSignal('VM-WEB-7821', 'reboot')">재부팅</button>
+                    <button class="btn btn-danger" onclick="sendControlSignal('VM-WEB-7821', 'stop')">정지</button>
+                </div>
+            </div>
+
+            <div class="server-item">
+                <div class="server-badge badge-db">DB<br>서버</div>
+                <div class="server-info">
+                    가상컴퓨터 ID: <strong>VM-DB-9942</strong><br>
+                    내부 고유 IP: <strong>192.168.10.30</strong>
+                </div>
+                <div class="server-info">
+                    스펙: vCPU 2 Cores / RAM 4GB<br>
+                    DBMS: MariaDB 11.x
+                </div>
+
+                <div class="monitoring-zone">
+                    <div class="metric-row">
+                        <span>CPU 사용량: <strong id="db-cpu-text">--%</strong></span>
+                        <div class="progress-container"><div id="db-cpu-bar" class="progress-bar-fill"></div></div>
+                    </div>
+                    <div class="metric-row">
+                        <span>RAM 사용량: <strong id="db-ram-text">--%</strong></span>
+                        <div class="progress-container"><div id="db-ram-bar" class="progress-bar-fill ram"></div></div>
+                    </div>
+                </div>
+
+                <div class="server-actions">
+                    <span class="btn btn-status">● 구동 중</span>
+                    <button class="btn" onclick="sendControlSignal('VM-DB-9942', 'reboot')">재부팅</button>
+                    <button class="btn btn-danger" onclick="sendControlSignal('VM-DB-9942', 'stop')">정지</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // A. 1.5초마다 차트 수치를 랜덤하게 변동시키는 애니메이션 루프
+    setInterval(function() {
+        let webCpu = Math.floor(Math.random() * 40) + 20; // 20~60%
+        let webRam = Math.floor(Math.random() * 30) + 50; // 50~80%
+        document.getElementById('web-cpu-text').innerText = webCpu + '%';
+        document.getElementById('web-cpu-bar').style.width = webCpu + '%';
+        document.getElementById('web-ram-text').innerText = webRam + '%';
+        document.getElementById('web-ram-bar').style.width = webRam + '%';
+
+        let dbCpu = Math.floor(Math.random() * 25) + 10; // 10~35%
+        let dbRam = Math.floor(Math.random() * 20) + 30; // 30~50%
+        document.getElementById('db-cpu-text').innerText = dbCpu + '%';
+        document.getElementById('db-cpu-bar').style.width = dbCpu + '%';
+        document.getElementById('db-ram-text').innerText = dbRam + '%';
+        document.getElementById('db-ram-bar').style.width = dbRam + '%';
+    }, 1500);
+
+    // B. 버튼을 누르면 컨트롤러 포스트 라우터로 데이터를 전송하는 원격 스크립트
+    function sendControlSignal(serverId, action) {
+        let actionName = (action === 'reboot') ? '재부팅' : '정지';
+        if(!confirm(`정말 해당 가상서버 [${serverId}]를 ${actionName}하시겠습니까?`)) {
+            return;
+        }
+
+        let form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/servers/control';
+
+        let idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'serverId';
+        idInput.value = serverId;
+        form.appendChild(idInput);
+
+        let actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = action;
+        form.appendChild(actionInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+</body>
+</html>

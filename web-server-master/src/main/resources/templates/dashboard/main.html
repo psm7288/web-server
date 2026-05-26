@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CloudHost - 대시보드 홈</title>
+    <style>
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
+        .navbar { background: #1a237e; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-size: 20px; font-weight: bold; color: white; text-decoration: none; }
+        .navbar .user-info { font-size: 14px; }
+        .navbar .logout-btn { margin-left: 14px; color: #ff8a80; text-decoration: none; }
+
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .tab-menu { display: flex; gap: 8px; border-bottom: 2px solid #1a237e; padding-bottom: 10px; margin-bottom: 25px; }
+        .tab-item { display: block; padding: 10px 20px; color: #555; text-decoration: none; font-weight: bold; }
+        .tab-item:hover { color: #1a237e; }
+        .tab-item.active { color: #1a237e; border-bottom: 4px solid #1a237e; }
+
+        .page-title { color: #1a237e; margin-bottom: 20px; }
+
+        /* 대시보드 요약 박스 */
+        .summary-box { background: white; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .summary-box h3 { margin-top: 0; color: #333; font-size: 16px; }
+        .summary-box .count { font-size: 32px; font-weight: bold; color: #1a237e; margin-top: 10px; }
+
+        /* 인프라 리스트 테이블 디자인 */
+        .section-title { font-size: 18px; color: #333; margin-bottom: 15px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #eeeee9; font-size: 14px; }
+        th { background: #f8f9fa; color: #555; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+
+        /* 상태 배지 기획 디자인 적용 */
+        .badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .badge-pending { background: #fff3cd; color: #856404; } /* PENDING 상태: 주황빛 노란색 */
+        .badge-running { background: #d4edda; color: #155724; }
+
+        .empty-message { text-align: center; padding: 40px; color: #888; background: white; border: 1px dashed #ccc; border-radius: 8px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/dashboard" class="logo">☁️ CloudHost</a>
+    <div class="user-info">
+        <span th:text="|${username}님 로그인 중|">테스트유저님 로그인 중</span>
+        <a href="#" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tab-menu">
+        <a href="/dashboard" class="tab-item active">🏠 대시보드 홈</a>
+        <a href="/servers/shop" class="tab-item">🛒 서버 상품 신청</a>
+        <a href="/servers/my" class="tab-item">💻 내 가상 서버 관리</a>
+    </div>
+
+    <h2 class="page-title">대시보드 홈</h2>
+
+    <div class="summary-box">
+        <h3>운영 중인 가상 서버 패키지</h3>
+        <div class="count"><span th:text="${serverCount}">0</span> 세트</div>
+    </div>
+
+    <div class="section-title">🛡️ 최근 할당 및 가동 인프라 신청 내역</div>
+
+    <div class="empty-message" th:if="${#lists.isEmpty(myServers)}">
+        현재 운영 중이거나 신청된 가상 서버 인프라가 존재하지 않습니다.
+    </div>
+
+    <table th:unless="${#lists.isEmpty(myServers)}">
+        <thead>
+        <tr>
+            <th>주문 식별 ID</th>
+            <th>WEB 서버 명칭</th>
+            <th>DB 스키마 스페이스</th>
+            <th>인프라 할당 상태</th>
+            <th>신청 등록 일시</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${myServers}">
+            <td><strong th:text="|PKG-${order.id}|">PKG-1</strong></td>
+            <td th:text="${order.webName}">user-web-01</td>
+            <td th:text="${order.dbSchemaName}">main_schema</td>
+            <td>
+                <span th:if="${order.status == 'PENDING'}" class="badge badge-pending">PENDING (대기중)</span>
+                <span th:if="${order.status == 'RUNNING'}" class="badge badge-running">RUNNING (구동중)</span>
+            </td>
+            <td th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-26 12:00:00</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
