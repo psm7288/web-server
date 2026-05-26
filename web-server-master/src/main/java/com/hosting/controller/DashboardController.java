@@ -99,6 +99,7 @@ public class DashboardController {
         return "redirect:/dashboard";
     }
 
+    
     // 5. [POST] 서버 운영 중 사양 변경 처리
     @PostMapping("/servers/upgrade")
     public String upgradeServer(
