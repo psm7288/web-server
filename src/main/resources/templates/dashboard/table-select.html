@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CloudHost - 초기 테이블 구조 정의</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background-color: #f4f6fb; color: #333; min-height: 100vh; }
+
+        /* GNB */
+        .navbar { background: #1a237e; color: white; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 800; text-decoration: none; color: white; }
+        .logo span { color: #82b1ff; }
+        .user-info { font-size: 14px; color: #e0e4ff; }
+        .user-info strong { color: #82b1ff; }
+
+        .container { max-width: 800px; margin: 40px auto; padding: 0 24px; }
+
+        .page-title-section { margin-bottom: 24px; }
+        .page-title-section h1 { font-size: 24px; font-weight: 800; color: #1a237e; }
+        .page-title-section p { font-size: 14px; color: #64748b; margin-top: 4px; }
+
+        .card { background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(26,35,126,0.06); padding: 32px; border: 1px solid #e2e8f0; }
+
+        /* 템플릿 카드 라디오 버튼 */
+        .template-options { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+        .template-item { border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; transition: all 0.2s; }
+        .template-item:hover { border-color: #82b1ff; background-color: #f8fafc; }
+        .template-item input[type="radio"] { margin-top: 4px; width: 18px; height: 18px; accent-color: #1a237e; }
+
+        .template-info h3 { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        .template-info p { font-size: 13px; color: #64748b; line-height: 1.5; }
+
+        .btn-box { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 24px; }
+        .btn-back { color: #64748b; font-weight: 700; text-decoration: none; font-size: 14px; }
+        .btn-submit { padding: 14px 32px; background-color: #1a237e; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(26,35,126,0.2); }
+        .btn-submit:hover { background-color: #1565c0; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/dashboard" class="logo">☁️ Cloud<span>Host</span></a>
+    <div class="user-info">
+        <strong><span th:text="${username}">테스트유저</span></strong>님 로그인 중
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-title-section">
+        <h1>Step 2. 초기 데이터베이스 테이블 구조 정의</h1>
+        <p>생성될 가상 DB 서버에 기본적으로 주입할 스키마 및 DDL 템플릿을 선택해 주세요.</p>
+    </div>
+
+    <form th:action="@{/servers/order/complete}" method="POST">
+
+        <input type="hidden" name="webName" th:value="${orderData.webName}">
+        <input type="hidden" name="webDesc" th:value="${orderData.webDesc}">
+        <input type="hidden" name="webCpu" th:value="${orderData.webCpu}">
+        <input type="hidden" name="webRam" th:value="${orderData.webRam}">
+        <input type="hidden" name="webStorage" th:value="${orderData.webStorage}">
+
+        <input type="hidden" name="dbName" th:value="${orderData.dbName}">
+        <input type="hidden" name="dbSchemaName" th:value="${orderData.dbSchemaName}">
+        <input type="hidden" name="dbUser" th:value="${orderData.dbUser}">
+        <input type="hidden" name="dbPassword" th:value="${orderData.dbPassword}">
+        <input type="hidden" name="dbCpu" th:value="${orderData.dbCpu}">
+        <input type="hidden" name="dbRam" th:value="${orderData.dbRam}">
+        <input type="hidden" name="dbStorage" th:value="${orderData.dbStorage}">
+
+        <div class="card">
+            <div class="template-options">
+
+                <label class="template-item">
+                    <input type="radio" name="tableTemplate" value="NONE" checked>
+                    <div class="template-info">
+                        <h3>Empty Schema (기본 스키마만 생성)</h3>
+                        <p>어떤 테이블도 생성하지 않고 순수 데이터베이스 물리 공간(Schema)만 깨끗하게 할당합니다.</p>
+                    </div>
+                </label>
+
+                <label class="template-item">
+                    <input type="radio" name="tableTemplate" value="SHOP">
+                    <div class="template-info">
+                        <h3>E-Commerce Mall Template (쇼핑몰 기본 스키마 주입)</h3>
+                        <p>회원 테이블(`MEMBER`), 상품 테이블(`PRODUCT`), 주문 테이블(`ORDERS`) 구조 DDL이 자동으로 실행 및 주입됩니다.</p>
+                    </div>
+                </label>
+
+                <label class="template-item">
+                    <input type="radio" name="tableTemplate" value="BOARD">
+                    <div class="template-info">
+                        <h3>General Bulletin Board Template (일반 자유게시판 스키마 주입)</h3>
+                        <p>게시글(`BOARD`), 댓글(`COMMENT`), 첨부파일(`ATTACHMENT`) 관리 테이블 구조 DDL이 자동 세팅됩니다.</p>
+                    </div>
+                </label>
+
+            </div>
+
+            <div class="btn-box">
+                <a href="/servers/shop" class="btn-back">← 이전 단계로 (스펙 재설정)</a>
+                <button type="submit" class="btn-submit">🚀 가상 통합 인프라 최종 자동 구축</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 클릭 시 라디오 버튼이 연동되어 시각적인 효과를 주고 싶을 때 사용 가능
+    document.querySelectorAll('.template-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const radio = item.querySelector('input[type="radio"]');
+            if(radio) radio.checked = true;
+        });
+    });
+</script>
+
+</body>
+</html>

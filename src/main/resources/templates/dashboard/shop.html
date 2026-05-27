@@ -63,6 +63,10 @@
 
         .btn-submit { padding: 14px 40px; background-color: #1a237e; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(26,35,126,0.2); }
         .btn-submit:hover { background-color: #1565c0; }
+
+        /* 추가된 중복확인 버튼용 스타일 */
+        .btn-dup-check { padding: 0 16px; background-color: #1a237e; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+        .btn-dup-check:hover { background-color: #1565c0; }
     </style>
 </head>
 <body>
@@ -87,7 +91,7 @@
         <h1>통합 서버 패키지 신청</h1>
     </div>
 
-    <form th:action="@{/servers/order}" method="POST">
+    <form th:action="@{/servers/table-select}" method="POST">
         <input type="hidden" name="productPackage" value="INTEGRATED_FULL_STACK">
 
         <div class="package-card">
@@ -150,7 +154,11 @@
 
                     <div class="form-group">
                         <label>DB 서버 이름</label>
-                        <input type="text" name="dbName" class="form-control" placeholder="예시) user-db-001" required>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="dbName" name="dbName" class="form-control" placeholder="예시) user-db-001" required>
+                            <button type="button" class="btn-dup-check" onclick="checkDbNameDup()">중복 확인</button>
+                        </div>
+                        <span id="dbNameCheckMsg" style="font-size: 12px; margin-top: 4px; display: block; font-weight: 600;"></span>
                     </div>
 
                     <div class="form-group">
@@ -165,7 +173,13 @@
 
                     <div class="form-group">
                         <label>DB 비밀번호 (Password)</label>
-                        <input type="password" name="dbPassword" class="form-control" placeholder="데이터베이스 접속 비밀번호" required>
+                        <input type="password" id="dbPassword" name="dbPassword" class="form-control" placeholder="데이터베이스 접속 비밀번호" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>DB 비밀번호 재확인</label>
+                        <input type="password" id="dbPasswordCheck" class="form-control" placeholder="비밀번호를 한번 더 입력하세요" required>
+                        <span id="pwCheckMsg" style="font-size: 12px; margin-top: 4px; display: block; font-weight: 600;"></span>
                     </div>
 
                     <div class="divider"></div>
@@ -203,13 +217,80 @@
                     <p class="price-label">Web + DB 통합 패키지 결제 예정 금액</p>
                     <p class="price-value">₩<strong id="total-price-display" style="font-weight: 800;">45,000</strong> <span class="unit">/ 월</span></p>
                 </div>
-                <button type="submit" class="btn-submit">🚀 통합 인프라 패키지 생성 자동화 실행</button>
+                <button type="submit" class="btn-submit">➡️ 다음 단계: 초기 테이블 구조 정의</button>
             </div>
         </div>
     </form>
 </div>
 
 <script>
+    // 🛠️ 프론트엔드 검증 플래그 할당
+    let isDbNameChecked = false;
+
+    // 1. DB 서버 이름 비동기 중복 체크 기능 (Fetch)
+    function checkDbNameDup() {
+        const dbNameInput = document.getElementById('dbName');
+        const dbName = dbNameInput.value.trim();
+        const msgSpan = document.getElementById('dbNameCheckMsg');
+
+        if (!dbName) {
+            alert('DB 서버 이름을 먼저 입력해 주세요.');
+            dbNameInput.focus();
+            return;
+        }
+
+        // 컨트롤러 비동기 엔드포인트 호출
+        fetch(`/servers/check-db-dup?dbName=${encodeURIComponent(dbName)}`)
+            .then(res => res.json())
+            .then(isDuplicate => {
+                if (isDuplicate) {
+                    msgSpan.style.color = '#dc2626'; // 빨간색
+                    msgSpan.innerText = '❌ 이미 사용 중인 DB 서버 이름입니다.';
+                    isDbNameChecked = false;
+                } else {
+                    msgSpan.style.color = '#16a34a'; // 초록색
+                    msgSpan.innerText = ' canUse ➔ 사용 가능한 DB 서버 이름입니다.';
+                    isDbNameChecked = true;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('중복 검사 시스템 통신에 실패했습니다.');
+            });
+    }
+
+    // DB 이름을 새로 수정하기 시작하면 다시 중복 체크 유도
+    document.getElementById('dbName').addEventListener('input', function() {
+        isDbNameChecked = false;
+        document.getElementById('dbNameCheckMsg').innerText = '';
+    });
+
+    // 2. DB 비밀번호 입력 필드 실시간 대조 검증 기능
+    const pwInput = document.getElementById('dbPassword');
+    const pwCheckInput = document.getElementById('dbPasswordCheck');
+    const pwMsg = document.getElementById('pwCheckMsg');
+
+    function validatePassword() {
+        if (!pwInput.value || !pwCheckInput.value) {
+            pwMsg.innerText = '';
+            return false;
+        }
+        if (pwInput.value === pwCheckInput.value) {
+            pwMsg.style.color = '#16a34a';
+            pwMsg.innerText = ' canUse ➔ 비밀번호가 일치합니다.';
+            return true;
+        } else {
+            pwMsg.style.color = '#dc2626';
+            pwMsg.innerText = '❌ 비밀번호가 실മായി 일치하지 않습니다.';
+            return false;
+        }
+    }
+
+    pwInput.addEventListener('input', validatePassword);
+    pwCheckInput.addEventListener('input', validatePassword);
+
+
+    // 3. 기존 가격 측정 엔진 스크립트 기반 동작 유지
     function updatePrice() {
         const basePrice = 45000;
         let additionalPrice = 0;
@@ -225,10 +306,24 @@
         document.getElementById('total-price-display').innerText = totalPrice.toLocaleString();
     }
 
-    // 💡 교정 완료: 페이지 진입 시 최초 금액(45,000원)이 스크립트 규격에 맞춰 깨끗하게 파싱되도록 함수 동적 호출 추가
     window.onload = function() {
         updatePrice();
     };
+
+    // 4. Form 전송 전 유효성 검사 차단 인터셉터
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!isDbNameChecked) {
+            e.preventDefault();
+            alert('DB 서버 이름 중복 확인을 완료해 주세요.');
+            return;
+        }
+        if (!validatePassword()) {
+            e.preventDefault();
+            alert('DB 비밀번호 재확인 입력이 올바르지 않습니다.');
+            pwCheckInput.focus();
+            return;
+        }
+    });
 </script>
 
 </body>

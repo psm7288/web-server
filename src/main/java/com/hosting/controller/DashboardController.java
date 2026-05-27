@@ -1,151 +1,239 @@
 package com.hosting.controller;
 
+import com.hosting.dto.ServerOrderDto;
 import com.hosting.entity.ServerOrder;
 import com.hosting.repository.ServerOrderRepository;
-import com.hosting.service.InfrastructureService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal; // 💡 스프링 시큐리티 인증 유저를 가져오기 위해 추가
-import java.time.LocalDateTime;
+
 import java.util.List;
+import java.util.Optional;
 
 @Controller
+@RequiredArgsConstructor
 public class DashboardController {
 
-    @Autowired
-    private ServerOrderRepository serverOrderRepository;
+    // 💡 중요: 프로젝트에 존재하는 'ServerOrderRepository'로 변수명을 일원화합니다.
+    private final ServerOrderRepository serverOrderRepository;
 
-    @Autowired
-    private InfrastructureService infrastructureService;
-
-    // 💡 [핵심 교정] 스프링 시큐리티 환경에서 진짜 로그인한 사용자의 ID를 추출하는 메서드
-    private String getLoginUsername(Principal principal) {
-        if (principal == null) {
-            // 혹시라도 로그인이 안 된 상태로 접근하면 임시 계정을 반환하되, 로그를 남깁니다.
-            System.out.println("⚠️ [경고] 비인증 사용자가 인프라 시스템에 접근했습니다.");
-            return "test_user";
-        }
-        // 시큐리티에 로그인된 진짜 아이디(예: audcks33)를 반환합니다.
-        return principal.getName();
-    }
-
-    // 1. [GET] 대시보드 홈 화면 매핑
+    /**
+     * 1. 대시보드 메인 홈 화면 매핑
+     */
     @GetMapping("/dashboard")
-    public String dashboardHome(Principal principal, Model model) {
-        String currentLoginUser = getLoginUsername(principal);
-        System.out.println("🔍 [대시보드 조회] 로그인된 사용자: " + currentLoginUser);
+    public String dashboardHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        String currentLoginUser = userDetails.getUsername();
+        List<ServerOrder> userOrders = serverOrderRepository.findByUsername(currentLoginUser);
 
         model.addAttribute("username", currentLoginUser);
-
-        // 자기가 생성한 서버 목록만 필터링
-        List<ServerOrder> userOrders = serverOrderRepository.findByUsername(currentLoginUser);
         model.addAttribute("serverCount", userOrders.size());
         model.addAttribute("myServers", userOrders);
-        return "dashboard/main";
+
+        return "dashboard/main"; // templates/dashboard/main.html
     }
 
-    // 2. [GET] 서버 상품 신청 화면 매핑
+    /**
+     * 1.8 서버 상품 신청 화면 진입 (shop.html 열기)
+     */
     @GetMapping("/servers/shop")
-    public String serverShop(Principal principal, Model model) {
-        model.addAttribute("username", getLoginUsername(principal));
-        return "dashboard/shop";
-    }
-
-    // 3. [GET] 내 가상 서버 관리 화면 매핑
-    @GetMapping("/servers/my")
-    public String myServers(Principal principal, Model model) {
-        String currentLoginUser = getLoginUsername(principal);
-        model.addAttribute("username", currentLoginUser);
-
-        List<ServerOrder> userServerList = serverOrderRepository.findByUsername(currentLoginUser);
-        model.addAttribute("serverList", userServerList);
-        return "dashboard/my";
-    }
-
-    // 4. [GET] 가상 서버 상세 페이지 조회 매핑
-    @GetMapping("/servers/detail/{id}")
-    public String serverDetail(@PathVariable("id") Long id, Principal principal, Model model) {
-        String currentLoginUser = getLoginUsername(principal);
-        model.addAttribute("username", currentLoginUser);
-
-        ServerOrder order = serverOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 서버 패키지가 존재하지 않습니다. ID: " + id));
-
-        // 다른 사람이 주소창에 ID 쳐서 들어오는 것 방지
-        if (!order.getUsername().equals(currentLoginUser)) {
-            return "redirect:/servers/my";
+    public String serverShop(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
         }
 
+        model.addAttribute("username", userDetails.getUsername());
+        return "dashboard/shop"; // templates/dashboard/shop.html
+    }
+
+    /**
+     * [신규] ⭐️ DB 서버 이름 비동기 중복 확인 API (Ajax 통신용)
+     */
+    @GetMapping("/servers/check-db-dup")
+    @ResponseBody
+    public boolean checkDbNameDuplicate(@RequestParam("dbName") String dbName) {
+        Optional<ServerOrder> existingOrder = serverOrderRepository.findByDbName(dbName);
+        return existingOrder.isPresent(); // 존재하면 true(중복), 없으면 false(사용 가능)
+    }
+
+    /**
+     * 1.9 내 가상 서버 관리 화면 목록 진입
+     */
+    @GetMapping("/servers/my")
+    public String myServers(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+        String currentLoginUser = userDetails.getUsername();
+        List<ServerOrder> myOrders = serverOrderRepository.findByUsername(currentLoginUser);
+
+        model.addAttribute("username", currentLoginUser);
+        model.addAttribute("serverList", myOrders);
+
+        return "dashboard/my"; // templates/dashboard/my.html
+    }
+
+    /**
+     * 2. 테이블 선택 브릿지 화면 (shop.html 양식 제출 시 이동)
+     */
+    @PostMapping("/servers/table-select")
+    public String goTableSelectPage(@ModelAttribute("orderData") ServerOrderDto orderDto,
+                                    @AuthenticationPrincipal UserDetails userDetails,
+                                    Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("username", userDetails.getUsername());
+        model.addAttribute("orderData", orderDto);
+
+        return "dashboard/table-select"; // templates/dashboard/table-select.html
+    }
+
+    /**
+     * 3. 최종 인프라 신청 완료 처리 후 대시보드로 이동 (table-select.html에서 제출됨)
+     */
+    @PostMapping("/servers/order/complete")
+    public String processFinalOrder(@ModelAttribute ServerOrderDto finalDto,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+        String currentLoginUser = userDetails.getUsername();
+
+        ServerOrder entity = new ServerOrder();
+        entity.setUsername(currentLoginUser);
+        entity.setWebName(finalDto.getWebName());
+        entity.setWebDesc(finalDto.getWebDesc());
+        entity.setWebCpu(finalDto.getWebCpu() == 0 ? 2 : finalDto.getWebCpu());
+        entity.setWebRam(finalDto.getWebRam() == 0 ? 4 : finalDto.getWebRam());
+        entity.setWebStorage(finalDto.getWebStorage() == 0 ? 50 : finalDto.getWebStorage());
+
+        entity.setDbName(finalDto.getDbName());
+        entity.setDbSchemaName(finalDto.getDbSchemaName());
+        entity.setDbUser(finalDto.getDbUser());
+
+        // 💡 엔티티에 맞춰 비밀번호 저장 활성화!
+        entity.setDbPassword(finalDto.getDbPassword());
+
+        entity.setDbCpu(finalDto.getDbCpu() == 0 ? 2 : finalDto.getDbCpu());
+        entity.setDbRam(finalDto.getDbRam() == 0 ? 4 : finalDto.getDbRam());
+        entity.setDbStorage(finalDto.getDbStorage() == 0 ? 100 : finalDto.getDbStorage());
+        entity.setStatus("RUNNING");
+
+        // 💡 신청 등록 일시 누락 버그 해결을 위해 현재 시간 주입!
+        entity.setCreatedAt(java.time.LocalDateTime.now());
+
+        serverOrderRepository.save(entity);
+
+        return "redirect:/dashboard";
+    }
+
+    /**
+     * 3.5 my.html 내부 서버 전원 제어 엔드포인트
+     */
+    @PostMapping("/servers/control")
+    public String controlServer(@RequestParam("serverId") Long serverId,
+                                @RequestParam("action") String action,
+                                @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+        String currentLoginUser = userDetails.getUsername();
+
+        Optional<ServerOrder> orderOptional = serverOrderRepository.findById(serverId);
+        if (orderOptional.isPresent()) {
+            ServerOrder order = orderOptional.get();
+            if (order.getUsername().equals(currentLoginUser)) {
+                if ("terminate_web".equals(action) || "terminate_db".equals(action)) {
+                    order.setStatus("PENDING");
+                } else if ("reboot_web".equals(action) || "reboot_db".equals(action)) {
+                    order.setStatus("RUNNING");
+                }
+                serverOrderRepository.save(order);
+            }
+        }
+        return "redirect:/servers/my";
+    }
+
+    /**
+     * 4. 가상 서버 인프라 상세 스펙 자원 관리 화면 (detail.html)
+     */
+    @GetMapping("/servers/detail/{id}")
+    public String serverDetail(@PathVariable("id") Long id,
+                               @AuthenticationPrincipal UserDetails userDetails,
+                               Model model) {
+        if (userDetails == null) return "redirect:/login";
+        String currentLoginUser = userDetails.getUsername();
+
+        Optional<ServerOrder> orderOptional = serverOrderRepository.findById(id);
+        if (orderOptional.isEmpty()) {
+            return "redirect:/dashboard";
+        }
+
+        ServerOrder order = orderOptional.get();
+        if (!order.getUsername().equals(currentLoginUser)) {
+            return "redirect:/dashboard";
+        }
+
+        model.addAttribute("username", currentLoginUser);
         model.addAttribute("order", order);
+
         return "dashboard/detail";
     }
 
-    // 5. [POST] 서버 자동화 생성 신청 수신 엔진
-    @PostMapping("/servers/order")
-    public String orderPackage(
-            @RequestParam(value="productPackage", required=false, defaultValue="기본 풀스택 패키지") String productPackage,
-            @RequestParam("webName") String webName,
-            @RequestParam(value="webDesc", required=false, defaultValue="웹 서버 인프라 스택") String webDesc,
-            @RequestParam(value="webCpu", required=false, defaultValue="2") int webCpu,
-            @RequestParam(value="webRam", required=false, defaultValue="4") int webRam,
-            @RequestParam(value="webStorage", required=false, defaultValue="50") int webStorage,
-            @RequestParam("dbName") String dbName,
-            @RequestParam(value="dbSchemaName", required=false, defaultValue="test_schema") String dbSchemaName,
-            @RequestParam("dbUser") String dbUser,
-            @RequestParam("dbPassword") String dbPassword,
-            @RequestParam(value="dbCpu", required=false, defaultValue="2") int dbCpu,
-            @RequestParam(value="dbRam", required=false, defaultValue="4") int dbRam,
-            @RequestParam(value="dbStorage", required=false, defaultValue="100") int dbStorage,
-            Principal principal) {
+    /**
+     * 5. detail.html 스펙 변경 추가 확장(Scale-Up) 수신 엔드포인트
+     */
+    @PostMapping("/servers/upgrade")
+    public String upgradeServerSpec(@RequestParam("packageId") Long packageId,
+                                    @RequestParam("webCpu") int webCpu,
+                                    @RequestParam("webRam") int webRam,
+                                    @RequestParam("webStorage") int webStorage,
+                                    @RequestParam("dbCpu") int dbCpu,
+                                    @RequestParam("dbRam") int dbRam,
+                                    @RequestParam("dbStorage") int dbStorage,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+        String currentLoginUser = userDetails.getUsername();
 
-        String currentLoginUser = getLoginUsername(principal);
+        Optional<ServerOrder> orderOptional = serverOrderRepository.findById(packageId);
+        if (orderOptional.isPresent()) {
+            ServerOrder order = orderOptional.get();
+            if (order.getUsername().equals(currentLoginUser)) {
+                order.setWebCpu(webCpu);
+                order.setWebRam(webRam);
+                order.setWebStorage(webStorage);
+                order.setDbCpu(dbCpu);
+                order.setDbRam(dbRam);
+                order.setDbStorage(dbStorage);
 
-        ServerOrder order = new ServerOrder();
-        order.setUsername(currentLoginUser); // 진짜 로그인한 유저명 주입!
-        order.setWebName(webName);
-        order.setWebDesc(webDesc);
-        order.setWebCpu(webCpu);
-        order.setWebRam(webRam);
-        order.setWebStorage(webStorage);
-
-        order.setDbName(dbName);
-        order.setDbSchemaName(dbSchemaName);
-        order.setDbUser(dbUser);
-        order.setDbPassword(dbPassword);
-        order.setDbCpu(dbCpu);
-        order.setDbRam(dbRam);
-        order.setDbStorage(dbStorage);
-
-        order.setStatus("RUNNING");
-        order.setCreatedAt(LocalDateTime.now());
-
-        ServerOrder savedOrder = serverOrderRepository.save(order);
-        System.out.println("✅ [격리 저장] 유저 [" + currentLoginUser + "] 명의로 인프라 정상 등록 완료");
-
-        try {
-            infrastructureService.simulateOpenStackProvisioning(savedOrder.getId());
-        } catch (Exception e) {
-            System.out.println("인프라 시뮬레이션 연동 생략");
+                serverOrderRepository.save(order);
+            }
         }
 
-        return "redirect:/servers/my";
+        return "redirect:/servers/detail/" + packageId;
     }
 
-    // 6. [POST] 가상 서버 패키지 전체 삭제 엔진 (404 에러 원천 차단 경로 수정)
+    /**
+     * 6. 서버 영구 삭제 엔드포인트
+     */
     @PostMapping("/servers/delete")
-    public String deletePackage(@RequestParam("packageId") Long packageId, Principal principal) {
-        String currentLoginUser = getLoginUsername(principal);
-        ServerOrder order = serverOrderRepository.findById(packageId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 패키지가 없습니다. ID: " + packageId));
+    public String deleteServer(@RequestParam("packageId") Long packageId,
+                               @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+        String currentLoginUser = userDetails.getUsername();
 
-        // 본인 소유의 서버일 때만 삭제 처리 작동
-        if (order.getUsername().equals(currentLoginUser)) {
-            serverOrderRepository.deleteById(packageId);
-            System.out.println("🗑️ [삭제 성공] 유저 " + currentLoginUser + "의 " + packageId + "번 패키지 영구 폐기");
+        Optional<ServerOrder> orderOptional = serverOrderRepository.findById(packageId);
+        if (orderOptional.isPresent()) {
+            ServerOrder order = orderOptional.get();
+            if (order.getUsername().equals(currentLoginUser)) {
+                serverOrderRepository.deleteById(packageId);
+            }
         }
 
-        return "redirect:/servers/my";
+        return "redirect:/dashboard";
     }
 }
