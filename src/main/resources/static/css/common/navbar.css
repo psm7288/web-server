@@ -1,0 +1,7 @@
+/* GNB 공통 스타일 */
+.navbar { background: #1a237e; color: white; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; }
+.logo { font-size: 20px; font-weight: 800; text-decoration: none; color: white; }
+.logo span { color: #82b1ff; }
+.user-info { font-size: 14px; color: #e0e4ff; }
+.user-info strong { color: #82b1ff; }
+.logout-btn { margin-left: 14px; color: #ff8a80; text-decoration: none; font-weight: 700; font-size: 13px; }

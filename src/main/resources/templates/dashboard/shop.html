@@ -3,73 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>CloudHost - 서버 상품 신청</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background-color: #f4f6fb; color: #333; min-height: 100vh; }
-
-        /* GNB */
-        .navbar { background: #1a237e; color: white; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 20px; font-weight: 800; text-decoration: none; color: white; }
-        .logo span { color: #82b1ff; }
-        .user-info { font-size: 14px; color: #e0e4ff; }
-        .user-info strong { color: #82b1ff; }
-        .logout-btn { margin-left: 14px; color: #ff8a80; text-decoration: none; font-weight: 700; font-size: 13px; }
-
-        /* 컨테이너 및 탭메뉴 */
-        .container { max-width: 1000px; margin: 40px auto; padding: 0 24px; }
-        .tab-menu { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 0; margin-bottom: 36px; }
-        .tab-item { display: block; padding: 12px 20px; font-size: 16px; font-weight: 700; color: #64748b; text-decoration: none; position: relative; transition: all 0.2s; }
-        .tab-item:hover { color: #1a237e; }
-        .tab-item.active { color: #1a237e; }
-        .tab-item.active::after { content: ""; position: absolute; bottom: -2px; left: 0; right: 0; height: 3px; background-color: #1a237e; border-radius: 3px 3px 0 0; }
-
-        .page-title-section { margin-bottom: 24px; }
-        .page-title-section h1 { font-size: 24px; font-weight: 800; color: #1a237e; }
-
-        /* 통합 패키지 카드 */
-        .package-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(26,35,126,0.06); border-top: 6px solid #1a237e; overflow: hidden; margin-bottom: 30px; }
-        .package-header { padding: 32px; background: linear-gradient(135deg, #1a237e, #1565c0); color: white; }
-        .package-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; background-color: #82b1ff; color: #1a237e; margin-bottom: 12px; }
-        .package-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-        .package-desc { font-size: 14px; opacity: 0.9; line-height: 1.6; }
-
-        .package-body { padding: 32px; display: flex; gap: 24px; background-color: #ffffff; }
-        .sub-component { flex: 1; background-color: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; }
-        .sub-component.web-box { border-left: 4px solid #1565c0; }
-        .sub-component.db-box { border-left: 4px solid #2e7d32; }
-
-        .comp-title { font-size: 16px; font-weight: 800; color: #1565c0; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-        .comp-title.db-title { color: #2e7d32; }
-
-        /* 폼 입력 항목 레이아웃 */
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
-        .form-control { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; background-color: white; color: #333; transition: border 0.15s; }
-        .form-control:focus { border-color: #1a237e; outline: none; }
-        .form-control::placeholder { color: #94a3b8; font-size: 13px; }
-
-        /* 스펙 변경 드롭다운 전용 */
-        .config-select { width: 100%; padding: 10px 12px; font-size: 14px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #fff; color: #0f172a; cursor: pointer; }
-
-        /* 구분선 */
-        .divider { height: 1px; background: #e2e8f0; margin: 20px 0; }
-
-        /* 푸터 하단 요금표 */
-        .package-footer { padding: 24px 32px; background-color: #f1f5f9; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; }
-        .price-info { text-align: left; }
-        .price-label { font-size: 13px; color: #64748b; margin-bottom: 2px; }
-        .price-value { font-size: 26px; font-weight: 800; color: #1a237e; }
-        .price-value .unit { font-size: 14px; font-weight: 500; color: #64748b; }
-
-        .btn-submit { padding: 14px 40px; background-color: #1a237e; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(26,35,126,0.2); }
-        .btn-submit:hover { background-color: #1565c0; }
-
-        /* 추가된 중복확인 버튼용 스타일 */
-        .btn-dup-check { padding: 0 16px; background-color: #1a237e; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
-        .btn-dup-check:hover { background-color: #1565c0; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/pages/shop.css}">
+    <link rel="stylesheet" th:href="@{/css/common/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/common/navbar.css}">
 </head>
 <body>
+<script th:src="@{/js/pages/shop.js}"></script>
 
 <nav class="navbar">
     <a href="/dashboard" class="logo">☁️ Cloud<span>Host</span></a>
@@ -91,7 +30,7 @@
         <h1>통합 서버 패키지 신청</h1>
     </div>
 
-    <form th:action="@{/servers/table-select}" method="POST">
+    <form th:action="@{/payments/save-and-checkout}" method="POST">
         <input type="hidden" name="productPackage" value="INTEGRATED_FULL_STACK">
 
         <div class="package-card">
@@ -108,7 +47,7 @@
 
                     <div class="form-group">
                         <label>웹 서버 이름</label>
-                        <input type="text" name="webName" class="form-control" placeholder="예시) user-web-001" required>
+                        <input type="text" name="webServerName" class="form-control" placeholder="예시) user-web-001" required>
                     </div>
 
                     <div class="form-group">
@@ -155,7 +94,7 @@
                     <div class="form-group">
                         <label>DB 서버 이름</label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="text" id="dbName" name="dbName" class="form-control" placeholder="예시) user-db-001" required>
+                            <input type="text" id="dbName" name="dbServerName" class="form-control" placeholder="예시) user-db-001" required>
                             <button type="button" class="btn-dup-check" onclick="checkDbNameDup()">중복 확인</button>
                         </div>
                         <span id="dbNameCheckMsg" style="font-size: 12px; margin-top: 4px; display: block; font-weight: 600;"></span>
@@ -163,7 +102,7 @@
 
                     <div class="form-group">
                         <label>생성할 Database 이름</label>
-                        <input type="text" name="dbSchemaName" class="form-control" placeholder="예시) myapp_db" required>
+                        <input type="text" name="dbName" class="form-control" placeholder="예시) myapp_db" required>
                     </div>
 
                     <div class="form-group">
@@ -217,114 +156,11 @@
                     <p class="price-label">Web + DB 통합 패키지 결제 예정 금액</p>
                     <p class="price-value">₩<strong id="total-price-display" style="font-weight: 800;">45,000</strong> <span class="unit">/ 월</span></p>
                 </div>
-                <button type="submit" class="btn-submit">➡️ 다음 단계: 초기 테이블 구조 정의</button>
+                <button type="submit" class="btn-submit">💳 다음 단계: 결제 확인</button>
             </div>
         </div>
     </form>
 </div>
-
-<script>
-    // 🛠️ 프론트엔드 검증 플래그 할당
-    let isDbNameChecked = false;
-
-    // 1. DB 서버 이름 비동기 중복 체크 기능 (Fetch)
-    function checkDbNameDup() {
-        const dbNameInput = document.getElementById('dbName');
-        const dbName = dbNameInput.value.trim();
-        const msgSpan = document.getElementById('dbNameCheckMsg');
-
-        if (!dbName) {
-            alert('DB 서버 이름을 먼저 입력해 주세요.');
-            dbNameInput.focus();
-            return;
-        }
-
-        // 컨트롤러 비동기 엔드포인트 호출
-        fetch(`/servers/check-db-dup?dbName=${encodeURIComponent(dbName)}`)
-            .then(res => res.json())
-            .then(isDuplicate => {
-                if (isDuplicate) {
-                    msgSpan.style.color = '#dc2626'; // 빨간색
-                    msgSpan.innerText = '❌ 이미 사용 중인 DB 서버 이름입니다.';
-                    isDbNameChecked = false;
-                } else {
-                    msgSpan.style.color = '#16a34a'; // 초록색
-                    msgSpan.innerText = ' canUse ➔ 사용 가능한 DB 서버 이름입니다.';
-                    isDbNameChecked = true;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('중복 검사 시스템 통신에 실패했습니다.');
-            });
-    }
-
-    // DB 이름을 새로 수정하기 시작하면 다시 중복 체크 유도
-    document.getElementById('dbName').addEventListener('input', function() {
-        isDbNameChecked = false;
-        document.getElementById('dbNameCheckMsg').innerText = '';
-    });
-
-    // 2. DB 비밀번호 입력 필드 실시간 대조 검증 기능
-    const pwInput = document.getElementById('dbPassword');
-    const pwCheckInput = document.getElementById('dbPasswordCheck');
-    const pwMsg = document.getElementById('pwCheckMsg');
-
-    function validatePassword() {
-        if (!pwInput.value || !pwCheckInput.value) {
-            pwMsg.innerText = '';
-            return false;
-        }
-        if (pwInput.value === pwCheckInput.value) {
-            pwMsg.style.color = '#16a34a';
-            pwMsg.innerText = ' canUse ➔ 비밀번호가 일치합니다.';
-            return true;
-        } else {
-            pwMsg.style.color = '#dc2626';
-            pwMsg.innerText = '❌ 비밀번호가 실മായി 일치하지 않습니다.';
-            return false;
-        }
-    }
-
-    pwInput.addEventListener('input', validatePassword);
-    pwCheckInput.addEventListener('input', validatePassword);
-
-
-    // 3. 기존 가격 측정 엔진 스크립트 기반 동작 유지
-    function updatePrice() {
-        const basePrice = 45000;
-        let additionalPrice = 0;
-
-        const selects = document.querySelectorAll('.config-select');
-        selects.forEach(select => {
-            const selectedOption = select.options[select.selectedIndex];
-            const price = parseInt(selectedOption.getAttribute('data-price')) || 0;
-            additionalPrice += price;
-        });
-
-        const totalPrice = basePrice + additionalPrice;
-        document.getElementById('total-price-display').innerText = totalPrice.toLocaleString();
-    }
-
-    window.onload = function() {
-        updatePrice();
-    };
-
-    // 4. Form 전송 전 유효성 검사 차단 인터셉터
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (!isDbNameChecked) {
-            e.preventDefault();
-            alert('DB 서버 이름 중복 확인을 완료해 주세요.');
-            return;
-        }
-        if (!validatePassword()) {
-            e.preventDefault();
-            alert('DB 비밀번호 재확인 입력이 올바르지 않습니다.');
-            pwCheckInput.focus();
-            return;
-        }
-    });
-</script>
 
 </body>
 </html>

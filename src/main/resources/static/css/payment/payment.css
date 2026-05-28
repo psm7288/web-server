@@ -1,0 +1,232 @@
+/* 기본 폰트 및 배경 설정 */
+body {
+    background: #f3f6fb;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 상단 네비게이션 바 */
+.navbar {
+    height: 64px;
+    padding: 0 42px;
+    display: flex;
+    align-items: center;
+    background: #1a237e; /* 로고와 헤더 색상 일치 */
+    color: white;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(26, 35, 126, 0.18);
+}
+
+/* 1. 컨테이너 여백 조정 */
+.container {
+    max-width: 200px; /* 전체 폭을 살짝 줄여 집중도 향상 */
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: 640px 380px; /* 카드 너비 최적화 */
+    gap: 24px; /* 기존 36px/40px에서 24px로 대폭 축소 */
+    justify-content: center; /* 중앙 정렬로 여백 밸런스 유지 */
+    align-items: start;
+}
+
+/* 결제 상단 제목 섹션 */
+.checkout-header {
+    grid-column: 1 / -1;
+    margin-bottom: 32px;
+    padding-left: 8px;
+}
+
+.checkout-header p {
+    color: #1a237e;
+    font-size: 14px;
+    font-weight: 900;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+}
+
+.checkout-header h1 {
+    font-size: 42px;
+    line-height: 1.1;
+    margin: 0;
+    color: #111827;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+}
+
+.checkout-header span {
+    display: block;
+    margin-top: 14px;
+    color: #6b7280;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* 왼쪽 주문 상세 영역 */
+.order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 공통 카드 스타일 (그림자 및 테두리 조정) */
+.card,
+.summary-card {
+    background: white;
+    border-radius: 20px; /* 스크린샷의 부드러운 곡률 반영 */
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+.card {
+    padding: 40px 48px;
+}
+
+/* 2. 섹션 타이틀 이모지 간격 */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* 이모지와 글자 사이 간격을 살짝 더 벌림 */
+    font-size: 24px; /* 본문 대비 너무 크지 않게 조절 */
+}
+
+/* 상세 정보 그리드 */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 40px;
+}
+
+.info-label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.info-value {
+    font-size: 20px;
+    color: #111827;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+/* 결제 수단 박스 */
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+}
+
+.payment-method p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.card-badge {
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #64748b;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+/* 오른쪽 결제 요약 영역 */
+.payment-summary {
+    position: sticky;
+    top: 30px;
+}
+
+/* 3. 오른쪽 주문 요약 카드 상단 라인 강조 */
+.summary-card {
+    padding: 40px;
+    border-top: 8px solid #1a237e;
+    /* 스크린샷보다 그림자를 살짝 더 부드럽게 */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card h3 {
+    font-size: 26px;
+    font-weight: 900;
+    margin: 0 0 32px;
+    color: #111827;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.price-row span:last-child {
+    font-weight: 900;
+    color: #111827;
+    font-size: 18px;
+}
+
+.price-row.discount span:last-child {
+    color: #16a34a; /* 초록색 포인트 */
+}
+
+/* [핵심] 최종 결제 금액만 빨간색 강조 */
+.price-row.total {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 2px solid #f1f5f9;
+    color: #dc2626; /* 강렬한 빨간색 */
+}
+
+.price-row.total span:first-child {
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.price-row.total span:last-child {
+    font-size: 32px;
+    font-weight: 900;
+}
+
+
+/* 결제 승인 버튼 */
+.btn-approve {
+    width: 100%;
+    background: #1a237e; /* 스크린샷과 동일한 짙은 네이비 */
+    color: white;
+    border: none;
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 20px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 32px;
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 20px rgba(26, 35, 126, 0.2);
+}
+
+.btn-approve:hover {
+    background: #151b60;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(26, 35, 126, 0.3);
+}
+
+/* 반응형 디자인 (태블릿/모바일) */
+@media (max-width: 1150px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .payment-summary {
+        position: static;
+    }
+}

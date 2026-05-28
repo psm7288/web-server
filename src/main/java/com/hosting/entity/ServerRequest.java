@@ -15,18 +15,42 @@ public class ServerRequest {
     private Long requestId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id")
     private Member member;
 
-    private String serverName;
-    private String requestType; // "WEB" or "DB"
-    private String status = "PENDING";
+    // 결제창에 출력될 핵심 필드들
+    private String webServerName;
+    private String dbServerName;
 
-    @Column(columnDefinition = "TEXT")
-    private String errorMsg;
+    private String webDesc;
+    private String dbName;
+    private String dbUser;
+    private String dbPassword;
+
+    // 사양 정보
+    private String webCpu;
+    private String webRam;
+    private String webStorage;
+    private String dbCpu;
+    private String dbRam;
+    private String dbStorage;
+
+    @Builder.Default
+    private String image = "Ubuntu 24.04 LTS";
+
+    @Builder.Default
+    private String flavor = "m1.small";
+
+    @Builder.Default
+    private boolean needDb = true;
+
+    @Builder.Default
+    private String status = "WAITING_PAYMENT";
 
     private LocalDateTime createdAt;
 
     @PrePersist
-    public void prePersist() { this.createdAt = LocalDateTime.now(); }
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

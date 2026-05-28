@@ -1,0 +1,47 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background-color: #f4f6fb; color: #333; min-height: 100vh; }
+
+.page-title-section { margin-bottom: 24px; }
+.page-title-section h1 { font-size: 24px; font-weight: 800; color: #1a237e; }
+
+/* 통합 패키지 카드 */
+.package-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(26,35,126,0.06); border-top: 6px solid #1a237e; overflow: hidden; margin-bottom: 30px; }
+.package-header { padding: 32px; background: linear-gradient(135deg, #1a237e, #1565c0); color: white; }
+.package-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; background-color: #82b1ff; color: #1a237e; margin-bottom: 12px; }
+.package-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.package-desc { font-size: 14px; opacity: 0.9; line-height: 1.6; }
+
+.package-body { padding: 32px; display: flex; gap: 24px; background-color: #ffffff; }
+.sub-component { flex: 1; background-color: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; }
+.sub-component.web-box { border-left: 4px solid #1565c0; }
+.sub-component.db-box { border-left: 4px solid #2e7d32; }
+
+.comp-title { font-size: 16px; font-weight: 800; color: #1565c0; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+.comp-title.db-title { color: #2e7d32; }
+
+/* 폼 입력 항목 레이아웃 */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+.form-control { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; background-color: white; color: #333; transition: border 0.15s; }
+.form-control:focus { border-color: #1a237e; outline: none; }
+.form-control::placeholder { color: #94a3b8; font-size: 13px; }
+
+/* 스펙 변경 드롭다운 전용 */
+.config-select { width: 100%; padding: 10px 12px; font-size: 14px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #fff; color: #0f172a; cursor: pointer; }
+
+/* 구분선 */
+.divider { height: 1px; background: #e2e8f0; margin: 20px 0; }
+
+/* 푸터 하단 요금표 */
+.package-footer { padding: 24px 32px; background-color: #f1f5f9; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; }
+.price-info { text-align: left; }
+.price-label { font-size: 13px; color: #64748b; margin-bottom: 2px; }
+.price-value { font-size: 26px; font-weight: 800; color: #1a237e; }
+.price-value .unit { font-size: 14px; font-weight: 500; color: #64748b; }
+
+.btn-submit { padding: 14px 40px; background-color: #1a237e; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(26,35,126,0.2); }
+.btn-submit:hover { background-color: #1565c0; }
+
+/* 추가된 중복확인 버튼용 스타일 */
+.btn-dup-check { padding: 0 16px; background-color: #1a237e; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.btn-dup-check:hover { background-color: #1565c0; }

@@ -1,0 +1,52 @@
+/* 기본 초기화 및 폰트 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background-color: #f4f6fb; color: #333; min-height: 100vh; }
+
+/* 중앙 컨테이너 기본 규격 */
+.container { max-width: 1000px; margin: 40px auto; padding: 0 24px; }
+
+/* 탭 메뉴 (main, shop, my 등 여러 곳에서 공통 사용) */
+.tab-menu { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 0; margin-bottom: 36px; }
+.tab-item { display: block; padding: 12px 20px; font-size: 16px; font-weight: 700; color: #64748b; text-decoration: none; position: relative; transition: all 0.2s; }
+.tab-item:hover { color: #1a237e; }
+.tab-item.active { color: #1a237e; }
+.tab-item.active::after { content: ""; position: absolute; bottom: -2px; left: 0; right: 0; height: 3px; background-color: #1a237e; border-radius: 3px 3px 0 0; }
+
+/* 회원 전용 공통 레이아웃 */
+.wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 16px; }
+.card { background:white; border-radius:14px; padding:36px 40px; width:100%; max-width:420px; box-shadow:0 2px 10px rgba(0,0,0,.07); }
+.card h2 { font-size:26px; font-weight:800; color:#1a237e; margin-bottom:6px; }
+.sub { color:#888; font-size:13px; margin-bottom:28px; }
+
+/* 공통 폼 요소 */
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:13px; font-weight:700; color:#333; margin-bottom:6px; }
+.form-control { width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:13px; outline:none; }
+.form-control:focus { border-color:#1565c0; }
+
+/* 공통 버튼 및 알림 */
+.btn { border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:700; cursor:pointer; }
+.btn-primary { background:#1565c0; color:white; }
+.btn-primary:hover { background:#0d47a1; }
+.alert-error { background:#fce4ec; color:#c62828; border-radius:8px; padding:10px 16px; font-size:13px; margin-bottom:16px; }
+.divider { height:1px; background:#e8eaf6; margin:20px 0; }
+
+/* 회원 전용 공통 레이아웃 */
+.wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 16px; }
+.card { background:white; border-radius:14px; padding:36px 40px; width:100%; max-width:420px; box-shadow:0 2px 10px rgba(0,0,0,.07); }
+.card h2 { font-size:26px; font-weight:800; color:#1a237e; margin-bottom:6px; }
+.sub { color:#888; font-size:13px; margin-bottom:28px; }
+
+/* 공통 폼 요소 */
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:13px; font-weight:700; color:#333; margin-bottom:6px; }
+.form-control { width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:13px; outline:none; }
+.form-control:focus { border-color:#1565c0; }
+
+/* 공통 버튼 및 알림 */
+.btn { border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:700; cursor:pointer; }
+.btn-primary { background:#1565c0; color:white; }
+.btn-primary:hover { background:#0d47a1; }
+.alert-error { background:#fce4ec; color:#c62828; border-radius:8px; padding:10px 16px; font-size:13px; margin-bottom:16px; }
+.divider { height:1px; background:#e8eaf6; margin:20px 0; }
+

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CloudHost - 결제 확인</title>
+
+    <link rel="stylesheet" th:href="@{/css/common/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/common/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/payment/payment.css}">
+</head>
+
+<body>
+
+<script th:src="@{/js/payment/payment.js}"></script>
+
+<nav class="navbar">
+    ☁️ CloudHost Billing System
+</nav>
+
+<div class="container">
+
+    <!-- 상단 헤더 -->
+    <div class="checkout-header">
+        <p>CloudHost Billing</p>
+        <h1>결제 정보를 확인해주세요</h1>
+        <span>승인 후 서버 구축 작업이 자동으로 시작됩니다.</span>
+    </div>
+
+    <!-- 좌측 상세 영역 -->
+    <div class="order-details">
+
+        <!-- 서비스 구성 카드 -->
+        <div class="card">
+
+            <h2 class="section-title">
+                📦 서비스 구성 내역
+            </h2>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <p class="info-label">웹 서버 명칭</p>
+                    <p class="info-value"
+                       th:text="${request.webServerName}">
+                        web-server-01
+                    </p>
+                </div>
+
+                <div class="info-item">
+                    <p class="info-label">데이터베이스 서버 명칭</p>
+
+                    <p class="info-value">
+
+                        <span th:if="${request.needDb}"
+                              th:text="${request.dbServerName}">
+                            db-server-01
+                        </span>
+
+                        <span th:unless="${request.needDb}"
+                              style="color:#9ca3af;">
+                            미신청
+                        </span>
+
+                    </p>
+                </div>
+
+                <div class="info-item">
+                    <p class="info-label">운영체제(OS)</p>
+
+                    <p class="info-value"
+                       th:text="${request.image}">
+                        Ubuntu 24.04 LTS
+                    </p>
+                </div>
+
+                <div class="info-item">
+                    <p class="info-label">인스턴스 사양(Flavor)</p>
+
+                    <p class="info-value"
+                       th:text="${request.flavor}">
+                        m1.small
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 결제 수단 카드 -->
+        <div class="card">
+
+            <h2 class="section-title">
+                💳 결제 수단
+            </h2>
+
+            <div class="payment-method">
+
+                <div class="card-badge">
+                    CARD
+                </div>
+
+                <p>
+                    개인 신용카드 (**** - **** - **** - 1234)
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 우측 주문 요약 -->
+    <aside class="payment-summary">
+
+        <div class="summary-card">
+
+            <h3>주문 요약</h3>
+
+            <div class="price-row">
+                <span>인프라 서비스 이용료</span>
+                <span>₩40,000</span>
+            </div>
+
+            <div class="price-row">
+                <span>부가 서비스 (백업/보안)</span>
+                <span>₩5,000</span>
+            </div>
+
+            <div class="price-row discount">
+                <span>할인 적용</span>
+                <span>-₩0</span>
+            </div>
+
+            <div class="price-row total">
+                <span>최종 결제 금액</span>
+                <span>₩45,000</span>
+            </div>
+
+            <form th:action="@{/payments/approve}" method="post">
+
+                <input type="hidden"
+                       name="requestId"
+                       th:value="${request.requestId}">
+
+                <button type="submit"
+                        class="btn-approve">
+
+                    결제 승인 및 구축 시작
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+</div>
+
+</body>
+</html>

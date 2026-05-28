@@ -64,4 +64,8 @@ public class MemberService implements UserDetailsService {
                 )
         );
     }
+    public Member findByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    }
 }
