@@ -14,6 +14,8 @@ public class DbServerInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dbInfoId;
 
+    private String dbConsoleUrl; // OpenStack noVNC URL 저장용
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "server_id", nullable = false)
     private Server server;

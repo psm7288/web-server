@@ -38,9 +38,9 @@
         <div class="package-header">
             <div class="package-title">
                 기본 풀스택 패키지
-                <span class="package-id" th:text="'(ID: PKG-' + ${order.id} + ')'">(ID: PKG-001)</span>
+                <span class="package-id" th:text="'(ID: PKG-' + ${order.requestId} + ')'">(ID: PKG-001)</span>
             </div>
-            <a th:href="@{/servers/detail/{id}(id=${order.id})}" class="detail-btn-link">🔍 인프라 자원 변경 및 상세 관리</a>
+            <a th:href="@{/servers/detail/{id}(id=${order.requestId})}" class="detail-btn-link">🔍 인프라 자원 변경 및 상세 관리</a>
         </div>
 
         <div class="package-content">
@@ -48,46 +48,67 @@
             <div class="server-row web-row">
                 <div class="server-type-badge web">Web 서버</div>
                 <div class="server-info-main">
-                    <div class="server-name" th:text="'가상컴퓨터 ID: ' + ${order.webName}">가상컴퓨터 ID: VM-WEB-7821</div>
-                    <div class="server-ip">접속 IP: <span>192.168.10.15</span></div>
+                    <div class="server-name" th:text="'가상컴퓨터 ID: ' + ${order.webServerName}">VM-WEB</div>
+                    <div class="server-ip">접속 IP: <span>할당 대기 중</span></div>
                 </div>
                 <div class="server-spec">
                     스펙: vCPU <strong th:text="${order.webCpu}">2</strong> Cores /
                     RAM <strong th:text="${order.webRam} + 'GB'">4GB</strong> / 스토리지 <strong th:text="${order.webStorage} + 'GB'">50GB</strong>
                 </div>
                 <div class="server-status-actions">
-                    <span class="status-indicator" th:text="${order.status == 'PENDING' ? '● 대기 중' : '● 구동 중'}">● 구동 중</span>
-                    <button class="action-btn" th:onclick="'sendControlSignal(' + ${order.id} + ', \'reboot_web\')'">재부팅</button>
-                    <button class="action-btn danger" th:onclick="'sendControlSignal(' + ${order.id} + ', \'terminate_web\')'">정지</button>
+                    <span class="status-indicator" th:text="${order.status == 'PENDING' ? '● 빌드 대기' : (order.status == 'ACTIVE' ? '● 구동 중' : '● 진행 중')}">● 상태 확인 중</span>
+                    <button class="action-btn" th:onclick="'sendControlSignal(' + ${order.requestId} + ', \'reboot_web\')'">재부팅</button>
+                    <button class="action-btn danger" th:onclick="'sendControlSignal(' + ${order.requestId} + ', \'terminate_web\')'">정지</button>
                 </div>
             </div>
 
             <div class="server-row db-row">
                 <div class="server-type-badge db">DB 서버</div>
                 <div class="server-info-main">
-                    <div class="server-name" th:text="'가상컴퓨터 ID: ' + ${order.dbName}">가상컴퓨터 ID: VM-DB-9942</div>
-                    <div class="server-ip">내부 고유 IP: <span>192.168.10.30</span></div>
+                    <div class="server-name" th:text="'가상컴퓨터 ID: ' + ${order.dbServerName}">VM-DB</div>
+                    <div class="server-ip">내부 고유 IP: <span>연결 대기 중</span></div>
                 </div>
                 <div class="server-spec">
                     스펙: vCPU <strong th:text="${order.dbCpu}">2</strong> Cores / RAM <strong th:text="${order.dbRam} + 'GB'">4GB</strong> / 스토리지 <strong th:text="${order.dbStorage} + 'GB'">100GB</strong><br>
-                    DBMS: MariaDB / 스키마: <strong th:text="${order.dbSchemaName}">myapp_db</strong>
+                    DBMS: MariaDB / 스키마: <strong th:text="${order.dbName}">myapp_db</strong>
                 </div>
                 <div class="server-status-actions">
                     <span class="status-indicator" th:text="${order.status == 'PENDING' ? '● 빌드 중' : '● 구동 중'}">● 구동 중</span>
 
                     <button th:if="${order.status == 'ACTIVE'}"
                             class="action-btn console-btn"
-                            th:onclick="'openDbConsole(' + ${order.id} + ')'"
+                            th:onclick="'openDbConsole(' + ${order.requestId} + ')'"
                             style="background-color: #2c3e50; color: white;">📟 콘솔 열기</button>
 
-                    <button class="action-btn" th:onclick="'sendControlSignal(' + ${order.id} + ', \'reboot_db\')'">재부팅</button>
-                    <button class="action-btn danger" th:onclick="'sendControlSignal(' + ${order.id} + ', \'terminate_db\')'">정지</button>
+                    <button class="action-btn" th:onclick="'sendControlSignal(' + ${order.requestId} + ', \'reboot_db\')'">재부팅</button>
+                    <button class="action-btn danger" th:onclick="'sendControlSignal(' + ${order.requestId} + ', \'terminate_db\')'">정지</button>
                 </div>
             </div>
-
         </div>
     </div>
-
 </div>
+
+<script th:inline="javascript">
+    function openDbConsole(serverId) {
+        fetch('/api/servers/' + serverId + '/console', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.consoleUrl) {
+                    window.open(data.consoleUrl, "_blank", "width=1024,height=768");
+                } else {
+                    alert("콘솔 주소를 불러오지 못했습니다.");
+                }
+            })
+            .catch(err => alert("서버 통신 오류가 발생했습니다."));
+    }
+
+    function sendControlSignal(id, action) {
+        alert(action + " 신호를 보냈습니다. (ID: " + id + ")");
+    }
+</script>
+
 </body>
 </html>
