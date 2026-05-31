@@ -8,7 +8,6 @@
     <link rel="stylesheet" th:href="@{/css/common/navbar.css}">
 </head>
 <body>
-<script th:src="@{/js/pages/shop.js}"></script>
 
 <nav class="navbar">
     <a href="/dashboard" class="logo">☁️ Cloud<span>Host</span></a>
@@ -30,8 +29,15 @@
         <h1>통합 서버 패키지 신청</h1>
     </div>
 
-    <form th:action="@{/payments/save-and-checkout}" method="POST">
+    <form th:action="@{/payments/save-and-checkout}" method="POST" id="orderForm">
+
         <input type="hidden" name="productPackage" value="INTEGRATED_FULL_STACK">
+        <input type="hidden" name="needDb" value="true">
+        <input type="hidden" name="webFlavor" id="webFlavor">
+        <input type="hidden" name="dbFlavor" id="dbFlavor">
+        <input type="hidden" name="webPrice" id="webPrice">
+        <input type="hidden" name="dbPrice" id="dbPrice">
+        <input type="hidden" name="totalPrice" id="totalPrice">
 
         <div class="package-card">
             <div class="package-header">
@@ -41,30 +47,24 @@
             </div>
 
             <div class="package-body">
-
                 <div class="sub-component web-box">
                     <h3 class="comp-title">🖥️ 웹 서버 설정 (Component 01)</h3>
-
                     <div class="form-group">
                         <label>웹 서버 이름</label>
                         <input type="text" name="webServerName" class="form-control" placeholder="예시) user-web-001" required>
                     </div>
-
                     <div class="form-group">
                         <label>웹 서버 설명</label>
                         <input type="text" name="webDesc" class="form-control" placeholder="예시) 메인 웹 인프라 서비스 운영 목적" required>
                     </div>
-
                     <div class="form-group">
                         <label>운영체제(OS)</label>
                         <input type="text" class="form-control" value="Ubuntu 24.04 LTS (고정)" disabled style="background:#e2e8f0; color:#64748b;">
                     </div>
-
                     <div class="divider"></div>
-
                     <div class="form-group">
                         <label>CPU 스펙 확장</label>
-                        <select name="webCpu" class="config-select" onchange="updatePrice()">
+                        <select name="webCpu" class="config-select" onchange="updateSpecifications()">
                             <option value="2" data-price="0">vCPU 2 Cores (기본)</option>
                             <option value="4" data-price="10000">vCPU 4 Cores (+10,000원)</option>
                             <option value="8" data-price="25000">vCPU 8 Cores (+25,000원)</option>
@@ -72,7 +72,7 @@
                     </div>
                     <div class="form-group">
                         <label>메모리(RAM) 확장</label>
-                        <select name="webRam" class="config-select" onchange="updatePrice()">
+                        <select name="webRam" class="config-select" onchange="updateSpecifications()">
                             <option value="4" data-price="0">4 GB (기본)</option>
                             <option value="8" data-price="12000">8 GB (+12,000원)</option>
                             <option value="16" data-price="28000">16 GB (+28,000원)</option>
@@ -80,7 +80,7 @@
                     </div>
                     <div class="form-group">
                         <label>스토리지(SSD) 확장</label>
-                        <select name="webStorage" class="config-select" onchange="updatePrice()">
+                        <select name="webStorage" class="config-select" onchange="updateSpecifications()">
                             <option value="50" data-price="0">50 GB (기본)</option>
                             <option value="100" data-price="5000">100 GB (+5,000원)</option>
                             <option value="200" data-price="15000">200 GB (+15,000원)</option>
@@ -90,42 +90,35 @@
 
                 <div class="sub-component db-box">
                     <h3 class="comp-title db-title">🗄️ 데이터베이스 설정 (Component 02)</h3>
-
                     <div class="form-group">
                         <label>DB 서버 이름</label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="text" id="dbName" name="dbServerName" class="form-control" placeholder="예시) user-db-001" required>
+                            <input type="text" id="dbServerName" name="dbServerName" class="form-control" placeholder="예시) user-db-001" required>
                             <button type="button" class="btn-dup-check" onclick="checkDbNameDup()">중복 확인</button>
                         </div>
                         <span id="dbNameCheckMsg" style="font-size: 12px; margin-top: 4px; display: block; font-weight: 600;"></span>
                     </div>
-
                     <div class="form-group">
                         <label>생성할 Database 이름</label>
                         <input type="text" name="dbName" class="form-control" placeholder="예시) myapp_db" required>
                     </div>
-
                     <div class="form-group">
                         <label>DB 사용자명 (Username)</label>
                         <input type="text" name="dbUser" class="form-control" placeholder="예시) admin_user" required>
                     </div>
-
                     <div class="form-group">
                         <label>DB 비밀번호 (Password)</label>
                         <input type="password" id="dbPassword" name="dbPassword" class="form-control" placeholder="데이터베이스 접속 비밀번호" required>
                     </div>
-
                     <div class="form-group">
                         <label>DB 비밀번호 재확인</label>
                         <input type="password" id="dbPasswordCheck" class="form-control" placeholder="비밀번호를 한번 더 입력하세요" required>
                         <span id="pwCheckMsg" style="font-size: 12px; margin-top: 4px; display: block; font-weight: 600;"></span>
                     </div>
-
                     <div class="divider"></div>
-
                     <div class="form-group">
                         <label>CPU 스펙 확장</label>
-                        <select name="dbCpu" class="config-select" onchange="updatePrice()">
+                        <select name="dbCpu" class="config-select" onchange="updateSpecifications()">
                             <option value="2" data-price="0">vCPU 2 Cores (기본)</option>
                             <option value="4" data-price="10000">vCPU 4 Cores (+10,000원)</option>
                             <option value="8" data-price="25000">vCPU 8 Cores (+25,000원)</option>
@@ -133,7 +126,7 @@
                     </div>
                     <div class="form-group">
                         <label>메모리(RAM) 확장</label>
-                        <select name="dbRam" class="config-select" onchange="updatePrice()">
+                        <select name="dbRam" class="config-select" onchange="updateSpecifications()">
                             <option value="4" data-price="0">4 GB (기본)</option>
                             <option value="8" data-price="12000">8 GB (+12,000원)</option>
                             <option value="16" data-price="28000">16 GB (+28,000원)</option>
@@ -141,26 +134,89 @@
                     </div>
                     <div class="form-group">
                         <label>스토리지(SSD) 확장</label>
-                        <select name="dbStorage" class="config-select" onchange="updatePrice()">
+                        <select name="dbStorage" class="config-select" onchange="updateSpecifications()">
                             <option value="100" data-price="0">100 GB (기본)</option>
                             <option value="200" data-price="10000">200 GB (+10,000원)</option>
                             <option value="500" data-price="30000">500 GB (+30,000원)</option>
                         </select>
                     </div>
                 </div>
-
             </div>
 
             <div class="package-footer">
                 <div class="price-info">
                     <p class="price-label">Web + DB 통합 패키지 결제 예정 금액</p>
-                    <p class="price-value">₩<strong id="total-price-display" style="font-weight: 800;">45,000</strong> <span class="unit">/ 월</span></p>
+                    <p class="price-value">₩<strong id="total-price-display" style="font-weight: 800;">27,000</strong> <span class="unit">/ 월</span></p>
                 </div>
                 <button type="submit" class="btn-submit">💳 다음 단계: 결제 확인</button>
             </div>
         </div>
     </form>
 </div>
+
+<script th:inline="javascript">
+    // 페이지 로드 시 초기 계산 실행
+    window.onload = function() {
+        updateSpecifications();
+    };
+
+    function updateSpecifications() {
+        // 1. 웹 서버 선택 요소들
+        const wCpu = document.querySelector('select[name="webCpu"]');
+        const wRam = document.querySelector('select[name="webRam"]');
+        const wSto = document.querySelector('select[name="webStorage"]');
+
+        // 2. DB 서버 선택 요소들
+        const dCpu = document.querySelector('select[name="dbCpu"]');
+        const dRam = document.querySelector('select[name="dbRam"]');
+        const dSto = document.querySelector('select[name="dbStorage"]');
+
+        // 3. 가격 계산 (Data Attribute 활용)
+        const basePrice = 27000; // 웹 서버 기본가
+        const wExtra = parseInt(wCpu.options[wCpu.selectedIndex].dataset.price) +
+            parseInt(wRam.options[wRam.selectedIndex].dataset.price) +
+            parseInt(wSto.options[wSto.selectedIndex].dataset.price);
+
+        const dExtra = parseInt(dCpu.options[dCpu.selectedIndex].dataset.price) +
+            parseInt(dRam.options[dRam.selectedIndex].dataset.price) +
+            parseInt(dSto.options[dSto.selectedIndex].dataset.price);
+
+        const totalWebPrice = basePrice + wExtra;
+        const total = totalWebPrice + dExtra;
+
+        // 4. Flavor 문자열 생성 (예: c4.r8.d100)
+        const webFlv = `c${wCpu.value}.r${wRam.value}.d${wSto.value}`;
+        const dbFlv = `c${dCpu.value}.r${dRam.value}.d${dSto.value}`;
+
+        // 5. Hidden 필드 데이터 동기화
+        document.getElementById('webFlavor').value = webFlv;
+        document.getElementById('dbFlavor').value = dbFlv;
+        document.getElementById('webPrice').value = totalWebPrice;
+        document.getElementById('dbPrice').value = dExtra;
+        document.getElementById('totalPrice').value = total;
+
+        // 6. 화면 표시 금액 업데이트
+        document.getElementById('total-price-display').innerText = total.toLocaleString();
+    }
+
+    // 비밀번호 일치 확인 (간단 예시)
+    document.getElementById('dbPasswordCheck').addEventListener('keyup', function() {
+        const pw = document.getElementById('dbPassword').value;
+        const check = this.value;
+        const msg = document.getElementById('pwCheckMsg');
+        if(pw === check) {
+            msg.innerText = "비밀번호가 일치합니다.";
+            msg.style.color = "green";
+        } else {
+            msg.innerText = "비밀번호가 일치하지 않습니다.";
+            msg.style.color = "red";
+        }
+    });
+
+    function checkDbNameDup() {
+        alert("DB 이름 중복 확인을 실행합니다.");
+    }
+</script>
 
 </body>
 </html>

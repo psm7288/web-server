@@ -19,6 +19,22 @@ public class DashboardController {
     private final MemberService memberService;
     private final ServerRequestRepository serverRequestRepository;
 
+    @GetMapping("/dashboard")
+    public String dashboardHome(Model model) {
+        // 대시보드 메인 페이지 HTML 이름 (예: dashboard/home.html)
+        return "dashboard/main";
+    }
+
+    /**
+     * [서버 상품 신청 페이지]
+     * 주소: localhost:8080/servers/shop
+     */
+    @GetMapping("/servers/shop")
+    public String shopPage(Model model) {
+        // 우리가 확인한 파일 경로: templates/dashboard/shop.html
+        return "dashboard/shop";
+    }
+
     @GetMapping("/servers/my")
     public String myServers(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) return "redirect:/login";
