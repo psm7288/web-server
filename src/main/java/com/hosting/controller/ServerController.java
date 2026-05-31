@@ -61,9 +61,8 @@ public class ServerController {
             // 2. DB에서 해당 서버와 사용자에 매핑된 콘솔 URL 조회
             // DbServerInfoRepository에 findByServer_ServerIdAndMemberId 메서드가 있어야 함
             DbServerInfo dbInfo = dbServerInfoRepository
-                    .findByServer_ServerIdAndMemberId(serverId, member.getMemberId())
+                    .findByServerIdAndMemberId(serverId, member.getMemberId()) // 메서드 이름 일치시킴
                     .orElseThrow(() -> new RuntimeException("해당 서버의 DB 정보를 찾을 수 없습니다."));
-
             // 3. 저장된 URL 반환
             return ResponseEntity.ok(Map.of("consoleUrl", dbInfo.getDbConsoleUrl()));
         } catch (Exception e) {
