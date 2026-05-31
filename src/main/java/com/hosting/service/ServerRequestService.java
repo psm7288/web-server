@@ -7,7 +7,10 @@ import lombok.extern.slf4j.Slf4j; // 로그용 추가
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 
 @Slf4j
 @Service
@@ -41,33 +44,37 @@ public class ServerRequestService {
         return String.format("c%d.r%d.d%d", cpu, ram, storage);
     }
 
+    // ServerRequestService.java (설계도 7번 반영)
     @Async
     public void runCreateScript(Long requestId) {
-        // [수정 포인트] 실제 스크립트 경로 (수민 님 환경에 맞춰 수정 가능)
-        String scriptPath = "/opt/hosting/provisioner/create_hosting_server.sh";
-
+        String scriptPath = "/opt/hosting/provisioner/run_remote_provision.sh"; // 설계도 6번 래퍼 스크립트 경로
         File scriptFile = new File(scriptPath);
 
-        // 파일이 존재하는지 먼저 확인 (에러 방지 로직)
         if (!scriptFile.exists()) {
-            log.error("❌ 스크립트 파일을 찾을 수 없습니다: {}", scriptPath);
-            log.info("💡 로컬 환경(Mac) 테스트 중이라면 이 로그는 정상입니다. DB 저장은 완료되었습니다.");
-            return; // 파일이 없으면 여기서 중단 (에러를 던지지 않음)
+            log.error("❌ 래퍼 스크립트 없음: {}", scriptPath);
+            return;
         }
 
         try {
-            log.info("🚀 서버 생성 스크립트 실행 시작 (ID: {})", requestId);
+            log.info("🚀 [AUTOMATION] 원격 생성 시작 - Request ID: {}", requestId);
             ProcessBuilder pb = new ProcessBuilder(scriptPath, String.valueOf(requestId));
-            pb.inheritIO();
+            pb.redirectErrorStream(true); // 에러 스트림 통합
+
             Process process = pb.start();
 
-            // 필요 시 프로세스 종료 대기 (비동기이므로 여기서 대기해도 사용자 응답엔 영향 없음)
-            // int exitCode = process.waitFor();
-            // log.info("✅ 스크립트 종료 코드: {}", exitCode);
+            // 설계도 7번: 실시간 로그 읽기
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.info("[AUTOMATION LOG] {}", line);
+                }
+            }
+
+            int exitCode = process.waitFor();
+            log.info("🏁 [AUTOMATION] 종료 코드: {}", exitCode);
 
         } catch (Exception e) {
-            log.error("⚠️ 스크립트 실행 중 예외 발생: {}", e.getMessage());
-            e.printStackTrace();
+            log.error("⚠️ 자동화 실행 중 치명적 오류: {}", e.getMessage());
         }
     }
 }

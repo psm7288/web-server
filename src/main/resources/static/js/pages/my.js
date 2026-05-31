@@ -76,7 +76,22 @@ document.getElementById('dbPasswordCheck').addEventListener('keyup', function() 
     }
 });
 
-function checkDbNameDup() {
-    alert("DB 이름 중복 확인을 실행합니다.");
+// my.html 하단 스크립트 예시
+function checkStatus(requestId, elementId) {
+    const interval = setInterval(() => {
+        fetch(`/api/servers/requests/${requestId}/status`)
+            .then(res => res.json())
+            .then(data => {
+                const statusBadge = document.getElementById(elementId);
+                statusBadge.innerText = data.status;
+
+                if (data.status === 'ACTIVE' || data.status === 'FAILED') {
+                    clearInterval(interval);
+                    location.reload(); // 완료되면 전체 새로고침하여 버튼 활성화
+                }
+            });
+    }, 5000); // 5초마다 체크
 }
+
+
 

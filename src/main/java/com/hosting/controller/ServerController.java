@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -80,5 +81,18 @@ public class ServerController {
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "콘솔 주소를 조회하는 중 오류가 발생했습니다: " + e.getMessage()));
         }
+    }
+    // ServerController.java 에 추가
+    @GetMapping("/requests/{requestId}/status")
+    public ResponseEntity<Map<String, Object>> getStatus(@PathVariable Long requestId) {
+        return serverRequestRepository.findById(requestId)
+                .map(req -> {
+                    Map<String, Object> statusMap = new HashMap<>();
+                    statusMap.put("requestId", req.getRequestId());
+                    statusMap.put("status", req.getStatus());
+                    statusMap.put("errorMsg", req.getErrorMsg());
+                    return ResponseEntity.ok(statusMap);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
