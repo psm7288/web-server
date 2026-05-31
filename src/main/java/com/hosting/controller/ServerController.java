@@ -16,13 +16,6 @@ public class ServerController {
 
     private final OpenStackService openStackService; // 서비스 주입
 
-    // 기존 쇼핑 페이지
-    @GetMapping("/shop")
-    public String shopPage(Model model, Principal principal) {
-        model.addAttribute("username", principal.getName());
-        return "shop";
-    }
-
     // [추가된 코드] 특정 서버의 콘솔 URL을 가져오는 API
     @GetMapping("/{serverId}/console")
     @ResponseBody // HTML이 아니라 데이터(주소)만 보낸다는 뜻
