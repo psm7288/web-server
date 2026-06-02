@@ -37,7 +37,36 @@
         </div>
 
         <div class="sub-box db">
-            <h2 class="section-title" style="color:#2e7d32;">🗄️ 데이터베이스 명세</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 32px;">
+                <h2 class="section-title" style="color:#2e7d32; margin: 0; line-height: 1;">🗄️ 데이터베이스 명세</h2><button type="button"
+                        th:onclick="|openDbConsole('${order.requestId}')|"
+                        style="
+                    /* 위치 및 크기 */
+                    margin-top: -4px; /* 버튼을 살짝 위로 올림 */
+                    height: 28px;    /* 버튼 높이 고정 */
+                    padding: 0 12px; /* 좌우 여백 */
+
+                    /* 정중앙 정렬 핵심 */
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    /* 디자인 */
+                    background-color: #2e7d32;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    transition: all 0.2s;
+                "
+                        onmouseover="this.style.backgroundColor='#1b5e20';"
+                        onmouseout="this.style.backgroundColor='#2e7d32';">
+                    콘솔 열기
+                </button>
+            </div>
             <div class="detail-row"><span class="label">데이터베이스 인스턴스 명칭</span><span class="val" th:text="${order.dbName}"></span></div>
             <div class="detail-row"><span class="label">기본 생성 스키마 물리명</span><span class="val" th:text="${order.dbName}"></span></div>
             <div class="detail-row"><span class="label">DB 마스터 루트 계정</span><span class="val" th:text="${order.dbUsername}"></span></div>
@@ -45,16 +74,8 @@
             <div class="detail-row"><span class="label">할당 메모리 용량</span><span class="val" th:text="${order.dbRam} + ' GB'"></span></div>
             <div class="detail-row"><span class="label">DB 볼륨 스토리지 용량</span><span class="val" th:text="${order.dbStorage} + ' GB'"></span></div>
         </div>
-        <div style="margin-top: auto; padding-top: 25px;">
-            <button type="button" class="btn"
-                    style="background-color: #2e7d32; color: white; width: 100%; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2); transition: all 0.2s ease;"
-                    onmouseover="this.style.backgroundColor='#1b5e20'; this.style.transform='translateY(-2px)';"
-                    onmouseout="this.style.backgroundColor='#2e7d32'; this.style.transform='translateY(0)';"
-                    th:onclick="|openDbConsole('${order.requestId}')|">
-                🖥️ DB SQL 콘솔 접속 (새 창)
-            </button>
-        </div>
     </div>
+</div>
 
     <div class="info-card">
         <h2 class="section-title">⚙️ 가상 인프라 자원 스펙 추가 확장 (Scale-Up)</h2>
