@@ -22,13 +22,14 @@
 
     <div class="header-box">
         <h1>패키지 상세 자원 스펙 관리</h1>
-        <span style="font-size: 13px; color: #64748b; font-weight: 600;" th:text="'신청일시: ' + ${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span>
+        <span style="font-size: 13px; color: #64748b; font-weight: 600;"
+              th:text="${order.createdAt != null ? '신청일시: ' + #temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss') : '신청일시 정보 없음'}"></span>
     </div>
 
     <div class="grid-two">
         <div class="sub-box web">
             <h2 class="section-title" style="color:#1565c0;">🖥️ 웹 서버 명세</h2>
-            <div class="detail-row"><span class="label">가상 컴퓨터 인스턴스 명칭</span><span class="val" th:text="${order.webName}"></span></div>
+            <div class="detail-row"><span class="label">가상 컴퓨터 인스턴스 명칭</span><span class="val" th:text="${order.webServerName}"></span></div>
             <div class="detail-row"><span class="label">웹 호스트 식별 상세 설명</span><span class="val" th:text="${order.webDesc != null ? order.webDesc : '설명 없음'}"></span></div>
             <div class="detail-row"><span class="label">할당된 가상 CPU 코어</span><span class="val" th:text="${order.webCpu} + ' Cores'"></span></div>
             <div class="detail-row"><span class="label">할당 메모리 용량</span><span class="val" th:text="${order.webRam} + ' GB'"></span></div>
@@ -38,22 +39,28 @@
         <div class="sub-box db">
             <h2 class="section-title" style="color:#2e7d32;">🗄️ 데이터베이스 명세</h2>
             <div class="detail-row"><span class="label">데이터베이스 인스턴스 명칭</span><span class="val" th:text="${order.dbName}"></span></div>
-            <div class="detail-row"><span class="label">기본 생성 스키마 물리명</span><span class="val" th:text="${order.dbSchemaName}"></span></div>
-            <div class="detail-row"><span class="label">DB 마스터 루트 계정</span><span class="val" th:text="${order.dbUser}"></span></div>
+            <div class="detail-row"><span class="label">기본 생성 스키마 물리명</span><span class="val" th:text="${order.dbName}"></span></div>
+            <div class="detail-row"><span class="label">DB 마스터 루트 계정</span><span class="val" th:text="${order.dbUsername}"></span></div>
             <div class="detail-row"><span class="label">할당된 가상 CPU 코어</span><span class="val" th:text="${order.dbCpu} + ' Cores'"></span></div>
             <div class="detail-row"><span class="label">할당 메모리 용량</span><span class="val" th:text="${order.dbRam} + ' GB'"></span></div>
             <div class="detail-row"><span class="label">DB 볼륨 스토리지 용량</span><span class="val" th:text="${order.dbStorage} + ' GB'"></span></div>
+        </div>
+        <div style="margin-top: auto; padding-top: 25px;">
+            <button type="button" class="btn"
+                    style="background-color: #2e7d32; color: white; width: 100%; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2); transition: all 0.2s ease;"
+                    onmouseover="this.style.backgroundColor='#1b5e20'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.backgroundColor='#2e7d32'; this.style.transform='translateY(0)';"
+                    th:onclick="|openDbConsole('${order.requestId}')|">
+                🖥️ DB SQL 콘솔 접속 (새 창)
+            </button>
         </div>
     </div>
 
     <div class="info-card">
         <h2 class="section-title">⚙️ 가상 인프라 자원 스펙 추가 확장 (Scale-Up)</h2>
-        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">서버 구동 중 필요한 하드웨어 성능을 상향 조정할 수 있으며, 현재 사양 대비 상향된 용량만큼 추가 과금(차액 결제)이 이루어집니다.</p>
-
         <form id="upgradeForm" th:action="@{/servers/upgrade}" method="POST">
-            <input type="hidden" name="packageId" th:value="${order.id}">
+            <input type="hidden" name="packageId" th:value="${order.requestId}">
             <input type="hidden" id="payAmountInput" name="payAmount" value="0">
-
             <div class="grid-two" style="margin-bottom: 12px;">
                 <div>
                     <h3 style="font-size:14px; font-weight:800; margin-bottom:10px; color:#1565c0;">Web 서버 확장 옵션</h3>
@@ -65,53 +72,8 @@
                             <option value="8" data-cost="25000" th:selected="${order.webCpu == 8}">vCPU 8 Cores (+25,000원)</option>
                         </select>
                     </div>
-                    <div class="form-group-spec">
-                        <label>메모리(RAM) 변경</label>
-                        <select name="webRam" class="select-ctrl" id="wRam" onchange="calcDiffPrice()">
-                            <option value="4" data-cost="0" th:selected="${order.webRam == 4}">4 GB (기본)</option>
-                            <option value="8" data-cost="12000" th:selected="${order.webRam == 8}">8 GB (+12,000원)</option>
-                            <option value="16" data-cost="28000" th:selected="${order.webRam == 16}">16 GB (+28,000원)</option>
-                        </select>
-                    </div>
-                    <div class="form-group-spec">
-                        <label>스토리지(SSD) 변경</label>
-                        <select name="webStorage" class="select-ctrl" id="wStorage" onchange="calcDiffPrice()">
-                            <option value="50" data-cost="0" th:selected="${order.webStorage == 50}">50 GB (기본)</option>
-                            <option value="100" data-cost="5000" th:selected="${order.webStorage == 100}">100 GB (+5,000원)</option>
-                            <option value="200" data-cost="15000" th:selected="${order.webStorage == 200}">200 GB (+15,000원)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 style="font-size:14px; font-weight:800; margin-bottom:10px; color:#2e7d32;">DB 서버 확장 옵션</h3>
-                    <div class="form-group-spec">
-                        <label>CPU 변경</label>
-                        <select name="dbCpu" class="select-ctrl" id="dCpu" onchange="calcDiffPrice()">
-                            <option value="2" data-cost="0" th:selected="${order.dbCpu == 2}">vCPU 2 Cores (기본)</option>
-                            <option value="4" data-cost="10000" th:selected="${order.dbCpu == 4}">vCPU 4 Cores (+10,000원)</option>
-                            <option value="8" data-cost="25000" th:selected="${order.dbCpu == 8}">vCPU 8 Cores (+25,000원)</option>
-                        </select>
-                    </div>
-                    <div class="form-group-spec">
-                        <label>메모리(RAM) 변경</label>
-                        <select name="dbRam" class="select-ctrl" id="dRam" onchange="calcDiffPrice()">
-                            <option value="4" data-cost="0" th:selected="${order.dbRam == 4}">4 GB (기본)</option>
-                            <option value="8" data-cost="12000" th:selected="${order.dbRam == 8}">8 GB (+12,000원)</option>
-                            <option value="16" data-cost="28000" th:selected="${order.dbRam == 16}">16 GB (+28,000원)</option>
-                        </select>
-                    </div>
-                    <div class="form-group-spec">
-                        <label>스토리지(SSD) 변경</label>
-                        <select name="dbStorage" class="select-ctrl" id="dStorage" onchange="calcDiffPrice()">
-                            <option value="100" data-cost="0" th:selected="${order.dbStorage == 100}">100 GB (기본)</option>
-                            <option value="200" data-cost="10000" th:selected="${order.dbStorage == 200}">200 GB (+10,000원)</option>
-                            <option value="500" data-cost="30000" th:selected="${order.dbStorage == 500}">500 GB (+30,000원)</option>
-                        </select>
-                    </div>
                 </div>
             </div>
-
             <button type="button" class="btn btn-primary" onclick="openPaymentModal()">🛒 스펙 인프라 변경 및 추가 차액 결제</button>
         </form>
     </div>
@@ -119,32 +81,12 @@
     <div class="info-card" style="border: 1px solid #fca5a5;">
         <h2 class="section-title" style="color: #dc2626;">🚨 Danger Zone (위험 구역)</h2>
         <div class="danger-zone">
-            <div class="danger-txt">
-                <h3>클라우드 가상 서버 패키지 영구 삭제 폐기</h3>
-                <p>이 작업을 수행하면 연동된 모든 가상 시스템 인프라 자원 및 내부 데이터베이스 레코드가 영구 파괴되며 복구할 수 없습니다.</p>
-            </div>
-            <form th:action="@{/servers/delete}" method="POST" onsubmit="return confirm('정말로 이 서버 풀스택 통합 인프라를 영구 폐기 삭제하시겠습니까?\n내부의 모든 원천 유저 데이터가 전면 파괴됩니다.');">
-                <input type="hidden" name="packageId" th:value="${order.id}">
+            <form th:action="@{/servers/delete}" method="POST" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                <input type="hidden" name="packageId" th:value="${order.requestId}">
                 <button type="submit" class="btn btn-danger">서버 영구 삭제</button>
             </form>
         </div>
     </div>
 </div>
-
-<div class="modal" id="payModal">
-    <div class="modal-content">
-        <div class="modal-header">💳 인프라 자원 변경 결제 승인요청</div>
-        <div class="modal-body">
-            선택하신 스펙 옵션의 변동 사양 구성을 감지했습니다.<br>
-            기존에 선결제된 서버 기본 금액을 제외한 **추가 결제 차액**은 아래와 같습니다.
-            <div class="modal-price">₩<span id="modalDiffDisplay">0</span>원</div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" style="background:#cbd5e1; color:#333;" onclick="closePaymentModal()">취소</button>
-            <button class="btn btn-primary" style="margin:0; width:auto; padding:10px 24px;" onclick="submitUpgrade()">카드 결제 및 변경 승인</button>
-        </div>
-    </div>
-</div>
-<script th:src="@{/js/pages/server-detail.js}"></script>
 </body>
 </html>
