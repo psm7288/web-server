@@ -5,6 +5,8 @@ import com.hosting.repository.ServerRequestRepository;
 import com.hosting.service.InfrastructureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -21,29 +23,37 @@ public class PaymentController {
         ServerRequest request = serverRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 신청 내역이 없습니다. ID: " + requestId));
 
-        // 2. [핵심] 자동화 스크립트 실행을 위한 기본값 명시적 설정
-        // DB에 NULL로 저장되는 것을 방지하고 스크립트가 읽어갈 데이터를 채웁니다.
+        // 2. 자동화 스크립트 필수 기본값 명시적 설정 (NULL 방지)
         request.setImage("Ubuntu-24.04");
         request.setFlavor("c2.r4.d50");
         request.setNetworkName("selfservice");
         request.setKeyName("mykey");
         request.setTargetHost("compute-PowerEdge-T360");
         request.setRequestType("hosting");
+        request.setStatus("PAID");
+        request.setNeedDb(true);
 
-        // serverName 설정: 폼에서 입력받은 웹 서버 이름에 -pkg 접미사 추가
+        // serverName 및 web/db 서버 명칭 설정
         if (request.getWebServerName() != null && !request.getWebServerName().isEmpty()) {
             request.setServerName(request.getWebServerName() + "-pkg");
+            request.setDbServerName(request.getWebServerName() + "-db");
         } else {
             request.setServerName("default-server-pkg");
+            request.setDbServerName("default-db-pkg");
         }
 
-        // 3. 상태 변경 및 업데이트된 정보 저장
-        request.setStatus("PAID");
+        // 3. DB 저장 및 트랜잭션 커밋 대기
         serverRequestRepository.save(request);
 
-        // 4. 서버 생성 자동화 스크립트 비동기 호출
-        // 위에서 save를 먼저 수행했으므로, 스크립트는 업데이트된 값을 참조하게 됩니다.
-        infrastructureService.runProvisioningScript(requestId);
+        // 4. [핵심] 현재 트랜잭션이 완전히 '커밋'된 후 스크립트를 비동기로 실행하도록 등록
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // 이 시점에는 완전히 커밋되었으므로, 스크립트 내부에서 정상 조회가 가능함
+                // 메서드 이름을 runProvisioningScript로 일치시켰습니다.
+                infrastructureService.runProvisioningScript(requestId);
+            }
+        });
 
         return "redirect:/dashboard?payment=success";
     }

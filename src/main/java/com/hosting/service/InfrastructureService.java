@@ -11,13 +11,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 @Service
-@RequiredArgsConstructor // Repository 주입을 위해 추가
+@RequiredArgsConstructor
 public class InfrastructureService {
 
     private final ServerRequestRepository serverRequestRepository;
 
     @Async
-    @Transactional // 상태 변경을 위해 트랜잭션 처리
+    @Transactional
     public void runProvisioningScript(Long requestId) {
         try {
             System.out.println("[AUTOMATION] 스크립트 시작: request_id=" + requestId);
