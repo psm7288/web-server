@@ -15,7 +15,7 @@ public class Server {
     private Long serverId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_id", nullable = false)
+    @JoinColumn(name = "request_id")
     private ServerRequest serverRequest;
 
     private String osServerId;

@@ -49,13 +49,17 @@
         </thead>
         <tbody>
         <tr th:each="order : ${myServers}">
-            <td><strong th:text="|PKG-${order.id}|">PKG-1</strong></td>
-            <td th:text="${order.webName}">user-web-01</td>
-            <td th:text="${order.dbSchemaName}">main_schema</td>
+            <td><strong th:text="|PKG-${order.requestId}|">PKG-1</strong></td>
+
+            <td th:text="${order.webServerName}">user-web-01</td>
+
+            <td th:text="${order.dbName}">main_schema</td>
+
             <td>
                 <span th:if="${order.status == 'PENDING'}" class="badge badge-pending">PENDING (대기중)</span>
                 <span th:if="${order.status == 'RUNNING'}" class="badge badge-running">RUNNING (구동중)</span>
             </td>
+
             <td th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-26 12:00:00</td>
         </tr>
         </tbody>

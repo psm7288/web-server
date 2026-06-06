@@ -19,12 +19,14 @@ public class ServerRequestService {
 
     @Transactional
     public ServerRequest createRequest(ServerRequest request) {
+        // 1. 웹서버 flavor 계산
         request.setWebFlavor(calculateFlavor(
                 request.getWebCpu(),
                 request.getWebRam(),
                 request.getWebStorage()
         ));
 
+        // 2. DB서버 flavor 계산
         if (request.isNeedDb()) {
             request.setDbFlavor(calculateFlavor(
                     request.getDbCpu(),
@@ -33,6 +35,7 @@ public class ServerRequestService {
             ));
         }
 
+        // 3. 자동화 스크립트가 필요한 기본값 세팅
         if (request.getRequestType() == null || request.getRequestType().isBlank()) {
             request.setRequestType("hosting");
         }
@@ -57,6 +60,7 @@ public class ServerRequestService {
             request.setTargetHost("compute-PowerEdge-T360");
         }
 
+        // 4. server_name NULL 방지
         if (request.getServerName() == null || request.getServerName().isBlank()) {
             if (request.getWebServerName() != null && !request.getWebServerName().isBlank()) {
                 request.setServerName(request.getWebServerName() + "-pkg");
@@ -65,18 +69,22 @@ public class ServerRequestService {
             }
         }
 
+        // 5. DB 서버 이름 NULL 방지
         if (request.isNeedDb()) {
             if (request.getDbServerName() == null || request.getDbServerName().isBlank()) {
                 request.setDbServerName(request.getWebServerName() + "-db");
             }
         }
 
+        // 6. 상태값 초기화
         request.setStatus("PENDING");
         request.setErrorMsg(null);
 
+        // 7. DB 저장
         ServerRequest savedRequest = serverRequestRepository.save(request);
         Long requestId = savedRequest.getRequestId();
 
+        // 8. 중요: DB commit 이후 자동화 스크립트 실행
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
@@ -90,5 +98,8 @@ public class ServerRequestService {
 
     private String calculateFlavor(int cpu, int ram, int storage) {
         return String.format("c%d.r%d.d%d", cpu, ram, storage);
+    }
+    public boolean existsByDbServerName(String dbServerName) {
+        return serverRequestRepository.existsByDbServerName(dbServerName);
     }
 }

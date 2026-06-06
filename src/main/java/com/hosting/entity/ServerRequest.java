@@ -3,6 +3,9 @@ package com.hosting.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "server_requests")
@@ -85,6 +88,10 @@ public class ServerRequest {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // 추가: Server 엔티티와의 연관관계 설정
+    @OneToMany(mappedBy = "serverRequest", cascade = CascadeType.ALL)
+    private List<Server> servers = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
