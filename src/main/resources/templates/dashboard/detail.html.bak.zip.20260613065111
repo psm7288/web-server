@@ -6,76 +6,6 @@
     <link rel="stylesheet" th:href="@{/css/pages/server-detail.css}">
     <link rel="stylesheet" th:href="@{/css/common/layout.css}">
     <link rel="stylesheet" th:href="@{/css/common/navbar.css}">
-
-<style>
-.deploy-section {
-    margin-top: 24px;
-}
-
-.deploy-card {
-    background: #ffffff;
-    border: 1px solid #dbe3ef;
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-}
-
-.deploy-card h2 {
-    margin: 0 0 12px;
-    font-size: 20px;
-    color: #0f3c8f;
-}
-
-.deploy-desc,
-.deploy-help {
-    color: #64748b;
-    font-size: 14px;
-    margin: 8px 0 16px;
-}
-
-.deploy-form {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.deploy-form input[type="file"] {
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    padding: 10px;
-    background: #f8fafc;
-}
-
-.deploy-form button {
-    border: none;
-    border-radius: 10px;
-    padding: 11px 18px;
-    background: #1565d8;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.deploy-success {
-    background: #e8f7ee;
-    color: #16783a;
-    border: 1px solid #bce8cb;
-    padding: 10px 12px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-}
-
-.deploy-error {
-    background: #fff1f2;
-    color: #be123c;
-    border: 1px solid #fecdd3;
-    padding: 10px 12px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-}
-</style>
-
 </head>
 <body>
 
@@ -153,32 +83,30 @@
 
             <hr style="margin:18px 0; border:0; border-top:1px solid #e5e7eb;">
 
-            
-            <hr style="margin:18px 0; border:0; border-top:1px solid #e5e7eb;">
-
-            <div class="deploy-inline-box">
-                <h3 style="font-size:17px; color:#1565c0; margin:0 0 10px;">📦 웹 파일 배포</h3>
-
-                <p class="deploy-desc">
-                    ZIP 파일을 업로드하면 내부에서 index.html을 자동으로 찾아 이 웹 서버에 배포합니다.
-                </p>
-
-                <div th:if="${successMessage}" class="deploy-success" th:text="${successMessage}"></div>
-                <div th:if="${errorMessage}" class="deploy-error" th:text="${errorMessage}"></div>
-
-                <form th:action="@{/servers/detail/{requestId}/deploy(requestId=${order.requestId})}"
-                      method="post"
-                      enctype="multipart/form-data"
-                      class="deploy-form">
-                    <input type="file" name="zipFile" accept=".zip" required>
-                    <button type="submit">ZIP 업로드 및 배포</button>
-                </form>
-
-                <p class="deploy-help">
-                    업로드 후 위의 웹 외부 접속 URL에서 결과를 확인하세요.
-                </p>
+            <div class="detail-row">
+                <span class="label">FTP Host</span>
+                <span class="val" th:text="${webInfo != null ? webInfo['ftp_host'] : '발급 대기 중'}">192.168.10.x</span>
             </div>
 
+            <div class="detail-row">
+                <span class="label">FTP Port</span>
+                <span class="val" th:text="${webInfo != null ? webInfo['ftp_port'] : '21'}">21</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">FTP 계정</span>
+                <span class="val" th:text="${webInfo != null ? webInfo['ftp_username'] : '발급 대기 중'}">webftp</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">FTP 비밀번호</span>
+                <span class="val" th:text="${webInfo != null ? webInfo['ftp_password'] : '발급 대기 중'}">password</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">FTP 업로드 경로</span>
+                <span class="val" th:text="${webInfo != null ? webInfo['ftp_path'] : '/var/www/html'}">/var/www/html</span>
+            </div>
         </div>
 
         <div class="sub-box db">
@@ -294,5 +222,6 @@
         </div>
     </div>
 </div>
+
 </body>
 </html>
