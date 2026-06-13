@@ -17,3 +17,7 @@ app.log
 .env
 application-secret.yml
 application-secret.properties
+
+# Backup files
+*.bak.*
+*.backup
